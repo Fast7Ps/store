@@ -324,6 +324,6 @@
   // Poll the cloud every 10s while the admin panel is open, so new remote
   // orders trigger the notification badge/sound without a manual refresh.
   if (isConfigured && isAdminPage()) {
-    setInterval(pullLiveSync, 10000);
+    setInterval(pullLiveSync, 5000);
   }
 })();

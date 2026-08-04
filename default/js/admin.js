@@ -1240,6 +1240,43 @@ function renderSalesChart() {
 let notifOrderCount = JSON.parse(localStorage.getItem('mycart_orders') || '[]').length;
 let notifInterval = null;
 
+// ===== Notification sound (admin) =====
+let adminAudioCtx = null;
+function getAdminAudioCtx() {
+  if (!adminAudioCtx) {
+    try { adminAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { adminAudioCtx = null; }
+  }
+  return adminAudioCtx;
+}
+// Browsers block audio until the user interacts; resume on first click/key.
+document.addEventListener('pointerdown', function(){ try { if (adminAudioCtx && adminAudioCtx.state === 'suspended') adminAudioCtx.resume(); } catch(e){} });
+document.addEventListener('keydown', function(){ try { if (adminAudioCtx && adminAudioCtx.state === 'suspended') adminAudioCtx.resume(); } catch(e){} });
+function playNotifSoundAdmin() {
+  try {
+    const ctx = getAdminAudioCtx();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 880; gain.gain.value = 0.35;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.stop(now + 0.35);
+    // second soft beep
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc2.type = 'sine';
+    osc2.frequency.value = 1174.66; gain2.gain.value = 0.3;
+    osc2.start(now + 0.18);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    osc2.stop(now + 0.55);
+  } catch (e) {}
+}
+
 function checkNewOrders() {
   const current = JSON.parse(localStorage.getItem('mycart_orders') || '[]').length;
   if (current > notifOrderCount) {
@@ -1303,9 +1340,9 @@ function updateNotifBadge() {
   if (currentOrders > notifOrderCount) {
     const diff = currentOrders - notifOrderCount;
     notifOrderCount = currentOrders;
-    playNotifSoundAdmin();
-    updateStats();
-    renderOrders();
+    try { playNotifSoundAdmin(); } catch(e) {}
+    try { updateStats(); } catch(e) {}
+    try { renderOrders(); } catch(e) {}
   } else if (currentOrders < notifOrderCount) {
     notifOrderCount = currentOrders;
   }
