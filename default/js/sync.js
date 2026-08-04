@@ -177,6 +177,53 @@
     return /admin\.html/i.test(window.location.pathname);
   }
 
+  // ===== Live refresh: pull latest shared data from Supabase so new remote
+  // orders/notifications appear in the admin panel without a manual reload =====
+  async function pullLiveSync() {
+    if (!isConfigured) return;
+    try {
+      const res = await fetch(REST + '/store_data?store_id=eq.' + encodeURIComponent(storeId) + '&select=key,value', {
+        headers: sbHeaders(false)
+      });
+      if (!res.ok) return;
+      const rows = await res.json();
+      const map = {};
+      rows.forEach(function(r){ map[r.key] = r.value; });
+
+      // Only pull keys that drive notifications/badges (low conflict risk)
+      if ('mycart_orders' in map) {
+        const localRaw = originalGetItem.call(localStorage, getNamespacedKey('mycart_orders'));
+        const cl = map.mycart_orders;
+        try {
+          const lArr = JSON.parse(localRaw || '[]');
+          const cArr = Array.isArray(cl) ? cl : JSON.parse(JSON.stringify(cl || []));
+          // Only apply when the cloud has MORE orders (a new customer order arrived).
+          // This never clobbers the admin's own in-progress status edits.
+          if (cArr.length > lArr.length) {
+            window.__syncingFromCloud = true;
+            originalSetItem.call(localStorage, getNamespacedKey('mycart_orders'), JSON.stringify(cArr));
+            window.__syncingFromCloud = false;
+            if (typeof window.checkAdminNewOrders === 'function') { try { window.checkAdminNewOrders(); } catch(e){} }
+            if (typeof window.updateNotifBadge === 'function') { try { window.updateNotifBadge(); } catch(e){} }
+            if (typeof window.renderOrders === 'function') { try { window.renderOrders(); } catch(e){} }
+          }
+        } catch (e) { }
+      }
+
+      if ('mycart_store_notifications' in map) {
+        const localRaw = originalGetItem.call(localStorage, getNamespacedKey('mycart_store_notifications'));
+        const cl = map.mycart_store_notifications;
+        const strVal = typeof cl === 'string' ? cl : JSON.stringify(cl);
+        if (strVal !== localRaw) {
+          window.__syncingFromCloud = true;
+          originalSetItem.call(localStorage, getNamespacedKey('mycart_store_notifications'), strVal);
+          window.__syncingFromCloud = false;
+          if (typeof window.updateNotifBadge === 'function') { try { window.updateNotifBadge(); } catch(e){} }
+        }
+      }
+    } catch (e) { }
+  }
+
   // ===== Load all data from Supabase =====
   async function loadFromCloud() {
     if (!isConfigured) { loadStaticFallback(); return; }
@@ -272,5 +319,11 @@
     }
   } catch (err) {
     console.warn('Could not sync data from server (running offline or direct file mode):', err);
+  }
+
+  // Poll the cloud every 10s while the admin panel is open, so new remote
+  // orders trigger the notification badge/sound without a manual refresh.
+  if (isConfigured && isAdminPage()) {
+    setInterval(pullLiveSync, 10000);
   }
 })();
