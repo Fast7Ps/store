@@ -1,6 +1,41 @@
 ﻿let WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || 'ADMIN123';
 
+// Legacy admin code used ONLY as a fallback when the company server is unreachable.
+// When the company has set a per-store admin_code, verification happens server-side
+// (see verifyAdminCode below) and this value is ignored entirely.
 const ADMIN_CODE = 'admin123';
+const ADMIN_STORE_ID = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.storeId) || 'default';
+
+// Master (company) panel connection details — used solely to verify the admin code.
+// The code itself is never stored in these scripts; the server returns yes/no only.
+var _panelUrl = 'https://scmgwkabtybtrmxdqniz.supabase.co';
+var _panelAnon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbWd3a2FidHlidHJteGRxbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjA3NDcsImV4cCI6MjEwMTQzNjc0N30.Lwqif_ViU7XJoO_zz_wovovOroIYvqpg3m0CJaCmi5w';
+
+// Returns a Promise<boolean>: verify the given code against the company's server,
+// falling back to the legacy constant only if the server is unreachable.
+function verifyAdminCode(code) {
+  return fetch(_panelUrl.replace(/\/+$/, '') + '/rest/v1/rpc/verify_store_admin', {
+    method: 'POST',
+    headers: {
+      'apikey': _panelAnon,
+      'Authorization': 'Bearer ' + _panelAnon,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ p_store: ADMIN_STORE_ID, p_code: code })
+  })
+    .then(function (res) {
+      if (!res.ok) throw new Error('http ' + res.status);
+      return res.json();
+    })
+    .then(function (val) {
+      // Server returns a boolean (or "true"/"false" string)
+      return val === true || val === 'true' || val === 1;
+    })
+    .catch(function () {
+      // Server unreachable -> fall back to the legacy code so the store isn't locked out offline.
+      return code === ADMIN_CODE;
+    });
+}
 
 let adminEditingId = null;
 
@@ -4560,26 +4595,43 @@ function logoutWholesale() {
 
 function submitLogin() {
   const code = document.getElementById('loginCode').value.trim();
-  if (code === ADMIN_CODE) {
-    closeLogin();
-    openAdmin();
-    return;
-  }
-  let reqs = [];
-  try { reqs = JSON.parse(localStorage.getItem('mycart_join_requests') || '[]'); } catch(e) {}
-  const approved = reqs.find(function(r) { return r.status === 'approved' && r.code && String(r.code).toLowerCase() === code.toLowerCase(); });
-  if (approved) {
-    isWholesale = true;
-    try { localStorage.setItem('mycart_wholesale', 'true'); } catch(e) {}
-    try { localStorage.setItem('mycart_wholesale_info', JSON.stringify({ name: approved.name, phone: approved.phone, city: approved.city, addr: approved.addr, note: approved.note, date: approved.date, code: approved.code, reveal: approved.reveal })); } catch(e) {}
-    applyWholesale();
-    document.getElementById('wholesaleBadge').style.display = 'inline-block';
-    closeLogin();
-    refreshLoginNavItem();
-    showToast('تم تسجيل الدخول كتاجر جملة', 'success');
-  } else {
+  if (!code) { document.getElementById('loginError').style.display = 'block'; return; }
+
+  // First, check the admin panel code (verified server-side for security).
+  // This is async; we show a small loading state if available.
+  var loginBtn = document.querySelector('.login-btn');
+  var prevText = loginBtn ? loginBtn.textContent : '';
+  if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = '...'; }
+
+  verifyAdminCode(code).then(function (isAdmin) {
+    if (isAdmin) {
+      closeLogin();
+      openAdmin();
+      return;
+    }
+
+    // Otherwise fall through to wholesale trader code check.
+    let reqs = [];
+    try { reqs = JSON.parse(localStorage.getItem('mycart_join_requests') || '[]'); } catch(e) {}
+    const approved = reqs.find(function(r) { return r.status === 'approved' && r.code && String(r.code).toLowerCase() === code.toLowerCase(); });
+    if (approved) {
+      isWholesale = true;
+      try { localStorage.setItem('mycart_wholesale', 'true'); } catch(e) {}
+      try { localStorage.setItem('mycart_wholesale_info', JSON.stringify({ name: approved.name, phone: approved.phone, city: approved.city, addr: approved.addr, note: approved.note, date: approved.date, code: approved.code, reveal: approved.reveal })); } catch(e) {}
+      applyWholesale();
+      document.getElementById('wholesaleBadge').style.display = 'inline-block';
+      closeLogin();
+      refreshLoginNavItem();
+      showToast('تم تسجيل الدخول كتاجر جملة', 'success');
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }).catch(function () {
+    // Fallback error state (shouldn't happen since verifyAdminCode catches internally)
     document.getElementById('loginError').style.display = 'block';
-  }
+  }).finally(function () {
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = prevText; }
+  });
 }
 
 function toggleAdminCode() {
