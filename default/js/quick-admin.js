@@ -170,7 +170,7 @@ window.addEventListener('beforeunload', function(e) {
 
 function adminRefreshAll() {
   adminSettings = loadAdminSettings();
-  WHOLESALE_CODE = adminSettings.wholesaleCode || 'ADMIN123';
+  WHOLESALE_CODE = adminSettings.wholesaleCode || '';
   CURRENCY = adminSettings.currency || '₪';
   products = loadProducts();
   wishlist = JSON.parse(localStorage.getItem('mycart_wishlist')) || [];
@@ -1211,7 +1211,6 @@ function adminLoadSettings() {
       </div>
       <div class="admin-card">
         <h4><i class="fa-solid fa-sliders"></i> إعدادات المتجر العامة</h4>
-        <div class="admin-form-group"><label>كود الجملة</label><input type="text" id="asWCode" value="${s.wholesaleCode || 'ADMIN123'}"></div>
         <div class="admin-form-group"><label>نسبة خصم الجملة (%) <i class="fa-regular fa-circle-question" style="color:#94a3b8;cursor:help;font-size:.75rem" onclick="showTooltipExample(this, 'تُستخدم تلقائياً عندما لا يوجد سعر جملة مخصص للمنتج. مثال: إذا كانت النسبة 20% والسعر 100، يصبح سعر الجملة 80. يمكنك تعديل هذه النسبة من هنا.')"></i></label><input type="number" id="asWDiscount" min="1" max="90" value="${s.wholesaleDiscount || 15}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem"></div>
         <div class="admin-form-group"><label>العملة</label><input type="text" id="asCurrency" value="${s.currency || '₪'}" maxlength="5"></div>
         <div class="admin-form-group"><label>الموقع</label>
@@ -1349,7 +1348,6 @@ function adminSaveSettings() {
   const nameEl = document.getElementById('asName');
   const tagEl = document.getElementById('asTagline');
   const modeEl = document.getElementById('asLogoMode');
-  const wCodeEl = document.getElementById('asWCode');
   const currEl = document.getElementById('asCurrency');
   const accentEl = document.getElementById('asAccent');
 
@@ -1367,7 +1365,6 @@ function adminSaveSettings() {
     lng: prev.lng || '',
     logoDisplayMode: modeEl ? modeEl.value : 'both',
     scrolledHeader: document.getElementById('asScrolledHeader')?.value || 'both',
-    wholesaleCode: (wCodeEl ? wCodeEl.value.trim() : '') || 'ADMIN123',
     wholesaleDiscount: parseInt(document.getElementById('asWDiscount')?.value) || 15,
     currency: (currEl ? currEl.value.trim() : '') || '₪',
     accentColor: accentEl ? accentEl.value : '#ef4444',
@@ -1379,7 +1376,6 @@ function adminSaveSettings() {
     storeImages: (function() { try { return JSON.parse(localStorage.getItem('mycart_store_images_temp')) || []; } catch(e) { return []; } })()
   };
   try { localStorage.setItem('mycart_admin_settings', JSON.stringify(s)); } catch(e) { showToast('⚠️ مساحة التخزين ممتلئة', 'error'); return; }
-  try { localStorage.setItem('mycart_wholesale_code', s.wholesaleCode); } catch(e) {}
   adminSettings = s;
   WHOLESALE_CODE = s.wholesaleCode;
   CURRENCY = s.currency;
@@ -2691,7 +2687,7 @@ function adminImport(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (data.products) { products.length = 0; products.push(...data.products); saveProductsToLS(); }
-      if (data.settings) { try { localStorage.setItem('mycart_admin_settings', JSON.stringify(data.settings)); } catch(e) {} adminSettings = data.settings; WHOLESALE_CODE = data.settings.wholesaleCode || 'ADMIN123'; CURRENCY = data.settings.currency || '₪'; }
+      if (data.settings) { try { localStorage.setItem('mycart_admin_settings', JSON.stringify(data.settings)); } catch(e) {} adminSettings = data.settings; WHOLESALE_CODE = data.settings.wholesaleCode || ''; CURRENCY = data.settings.currency || '₪'; }
       if (data.orders) { try { localStorage.setItem('mycart_orders', JSON.stringify(data.orders)); } catch(e) {} }
       if (data.cart) { try { localStorage.setItem('mycart_cart', JSON.stringify(data.cart)); } catch(e) {} }
       if (data.customer) { try { localStorage.setItem('mycart_customer', JSON.stringify(data.customer)); } catch(e) {} }

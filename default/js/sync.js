@@ -150,8 +150,7 @@ function flushPending() {
     'mycart_categories',
     'mycart_logo',
     'mycart_marketing',
-    'mycart_orders',
-    'mycart_wholesale_code'
+    'mycart_orders'
   ];
 
   function loadStaticFallback() {

@@ -35,7 +35,7 @@ function saveProductsToLS() {
 }
 
 function loadAdminSettings() {
-  var d = { storeName: 'متجري', tagline: 'اختر منتجك المفضل', phone: '', whatsapp: '', email: '', address: '', hours: '', lat: '', lng: '', storeImages: [], wholesaleCode: 'ADMIN123', currency: '₪', accentColor: '#ef4444', lang: 'ar', scrolledHeader: 'both', showFlashSales: true, showStoreCard: true, social: { facebook: '', instagram: '', twitter: '', tiktok: '', youtube: '', telegram: '', snapchat: '', website: '' } };
+  var d = { storeName: 'متجري', tagline: 'اختر منتجك المفضل', phone: '', whatsapp: '', email: '', address: '', hours: '', lat: '', lng: '', storeImages: [], wholesaleCode: '', currency: '₪', accentColor: '#ef4444', lang: 'ar', scrolledHeader: 'both', showFlashSales: true, showStoreCard: true, social: { facebook: '', instagram: '', twitter: '', tiktok: '', youtube: '', telegram: '', snapchat: '', website: '' } };
   try {
     const stored = localStorage.getItem('mycart_admin_settings');
     if (stored) { const parsed = JSON.parse(stored); return Object.assign({}, d, parsed, { social: Object.assign({}, d.social, parsed.social || {}) }); }

@@ -1,9 +1,7 @@
-﻿let WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || 'ADMIN123';
+﻿let WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || '';
 
-// Legacy admin code used ONLY as a fallback when the company server is unreachable.
-// When the company has set a per-store admin_code, verification happens server-side
-// (see verifyAdminCode below) and this value is ignored entirely.
-const ADMIN_CODE = 'admin123';
+// The per-store admin code is stored ONLY at the company server and verified
+// via verifyAdminCode below. No local/legacy code exists anymore.
 const ADMIN_STORE_ID = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.storeId) || 'default';
 
 // Master (company) panel connection details — used solely to verify the admin code.
@@ -11,8 +9,8 @@ const ADMIN_STORE_ID = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.storeId
 var _panelUrl = 'https://scmgwkabtybtrmxdqniz.supabase.co';
 var _panelAnon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbWd3a2FidHlidHJteGRxbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjA3NDcsImV4cCI6MjEwMTQzNjc0N30.Lwqif_ViU7XJoO_zz_wovovOroIYvqpg3m0CJaCmi5w';
 
-// Returns a Promise<boolean>: verify the given code against the company's server,
-// falling back to the legacy constant only if the server is unreachable.
+// Returns a Promise<boolean>: verify the given code against the company's server.
+// No local fallback exists — the company code is the only valid one.
 function verifyAdminCode(code) {
   return fetch(_panelUrl.replace(/\/+$/, '') + '/rest/v1/rpc/verify_store_admin', {
     method: 'POST',
@@ -32,8 +30,8 @@ function verifyAdminCode(code) {
       return val === true || val === 'true' || val === 1;
     })
     .catch(function () {
-      // Server unreachable -> fall back to the legacy code so the store isn't locked out offline.
-      return code === ADMIN_CODE;
+      // Server unreachable -> reject the login (no offline backdoor).
+      return false;
     });
 }
 
@@ -7100,7 +7098,7 @@ function initAdminFns() {
         if (data.categories) { try { localStorage.setItem('mycart_categories', JSON.stringify(data.categories)); } catch(e) {} }
         if (data.discountCodes) { try { localStorage.setItem('mycart_discount_codes', JSON.stringify(data.discountCodes)); } catch(e) {} }
         if (data.products) { products.length = 0; products.push(...data.products); saveProductsToLS(); }
-        if (data.settings) { try { localStorage.setItem('mycart_admin_settings', JSON.stringify(data.settings)); } catch(e) {} adminSettings = data.settings; WHOLESALE_CODE = data.settings.wholesaleCode || 'ADMIN123'; CURRENCY = data.settings.currency || '₪'; }
+        if (data.settings) { try { localStorage.setItem('mycart_admin_settings', JSON.stringify(data.settings)); } catch(e) {} adminSettings = data.settings; WHOLESALE_CODE = data.settings.wholesaleCode || ''; CURRENCY = data.settings.currency || '₪'; }
         if (data.orders) { try { localStorage.setItem('mycart_orders', JSON.stringify(data.orders)); } catch(e) {} }
         if (data.cart) { try { localStorage.setItem('mycart_cart', JSON.stringify(data.cart)); } catch(e) {} }
         if (data.customer) { try { localStorage.setItem('mycart_customer', JSON.stringify(data.customer)); } catch(e) {} }
@@ -7144,7 +7142,7 @@ window.addEventListener('storage', function(e) {
     products = loadProducts();
     adminSettings = loadAdminSettings();
     CURRENCY = adminSettings.currency || '₪';
-    WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || 'ADMIN123';
+    WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || '';
     renderCategories();
     renderProducts(getFilteredProducts());
   }

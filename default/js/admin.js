@@ -1,7 +1,9 @@
-const ADMIN_PASSWORD = 'admin123';
 const LS_PRODUCTS = 'mycart_admin_products';
 const LS_SETTINGS = 'mycart_admin_settings';
 const LS_CATEGORIES = 'mycart_categories';
+
+// No hardcoded admin password. Access requires a password set server-side/stored.
+const ADMIN_PASSWORD = '';
 
 function showToast(msg, type) {
   var el = document.getElementById('toast') || (function(){
@@ -222,7 +224,7 @@ function saveSettings() {
   if (taglineEl) settings.tagline = taglineEl.value.trim();
   var modeEl = document.getElementById('setHeaderDisplayMode');
   if (modeEl) settings.logoDisplayMode = modeEl.value;
-  settings.wholesaleCode = document.getElementById('setWholesaleCode').value.trim() || 'ADMIN123';
+  settings.wholesaleCode = document.getElementById('setWholesaleCode').value.trim() || '';
   settings.currency = document.getElementById('setCurrency').value.trim() || '₪';
   var color = document.getElementById('setAccent').value;
   settings.accentColor = color;
@@ -590,7 +592,7 @@ function loadSettings() {
   if (stored) {
     try { return JSON.parse(stored); } catch(e) {}
   }
-  return { storeName: '???', tagline: '???? ??? ??????', wholesaleCode: 'ADMIN123', currency: '?', accentColor: '#ef4444' };
+  return { storeName: '???', tagline: '???? ??? ??????', wholesaleCode: '', currency: '?', accentColor: '#ef4444' };
 }
 if (typeof settings === 'undefined') var settings = loadSettings();
 if (typeof categories === 'undefined') var categories = loadCategories();
@@ -2367,7 +2369,7 @@ function populateSettings() {
   if (modeEl) modeEl.value = s.logoDisplayMode || 'both';
   
   const wholesaleEl = document.getElementById('setWholesaleCode');
-  if (wholesaleEl) wholesaleEl.value = s.wholesaleCode || 'ADMIN123';
+  if (wholesaleEl) wholesaleEl.value = s.wholesaleCode || '';
   
   const currencyEl = document.getElementById('setCurrency');
   if (currencyEl) currencyEl.value = s.currency || '₪';
