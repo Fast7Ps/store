@@ -321,9 +321,19 @@
     console.warn('Could not sync data from server (running offline or direct file mode):', err);
   }
 
-  // Poll the cloud every 10s while the admin panel is open, so new remote
-  // orders trigger the notification badge/sound without a manual refresh.
-  if (isConfigured && isAdminPage()) {
-    setInterval(pullLiveSync, 5000);
+  // Poll the cloud while the admin panel is open, so new remote orders trigger
+  // the notification badge/sound without a manual refresh.
+  var liveTimer = null;
+  function startLiveSync() {
+    if (!isConfigured || liveTimer) return;
+    liveTimer = setInterval(pullLiveSync, 5000);
+    pullLiveSync();
   }
+  function stopLiveSync() {
+    if (liveTimer) { clearInterval(liveTimer); liveTimer = null; }
+  }
+  window.__supabaseStartLive = startLiveSync;
+  window.__supabaseStopLive = stopLiveSync;
+
+  if (isConfigured && isAdminPage()) startLiveSync();
 })();

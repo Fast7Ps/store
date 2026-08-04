@@ -6973,6 +6973,7 @@ function startAdminNotifCheck() {
   if (adminNotifInterval) clearInterval(adminNotifInterval);
   checkAdminNewOrders();
   adminNotifInterval = setInterval(checkAdminNewOrders, 3000);
+  if (typeof window.__supabaseStartLive === 'function') { try { window.__supabaseStartLive(); } catch(e) {} }
 }
 
 // Listen for storage changes from other tabs (same origin)
@@ -6993,6 +6994,7 @@ function wrapAdminFns() {
   closeAdmin = function() {
     origCA();
     if (adminNotifInterval) clearInterval(adminNotifInterval);
+    if (typeof window.__supabaseStopLive === 'function') { try { window.__supabaseStopLive(); } catch(e) {} }
   };
   initAdminFns();
 }
