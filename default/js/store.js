@@ -7891,13 +7891,10 @@ function updateAdminNotifBadge() {
 }
 
 function checkSuspension() {
-  // مصدر الحقيقة الوحيد الآن هو لوحة التحكم (نعم: panel-link.js).
-  // هذا المنطق القديم (رسوم الخطة المجانية عبر localStorage) أصبح متعارضاً
-  // مع لوحة إدارة الشركة، لذا نعطّله لتفادي إغلاق المتجر بالخطأ.
-  // (يبقى فقط مرهوناً بحالة اللوحة المحدَّدة في panel-link.js)
-  if (localStorage.getItem('mycart_store_suspended') === 'true' && !window.location.pathname.includes('maintenance.html')) {
-    window.location.replace('maintenance.html');
-  }
+  // التحويل بين index وmaintenance يتم حصرياً في panel-link.js (مصدر الحقيقة:
+  // لوحة التحكم). هنا فقط نمسح أي علامة قديمة عالقة حتى لا تسبب حلقة ريفرش
+  // بين index وmaintenance، بينما panel-link يقرر التحويل من الخادم مباشرة.
+  try { localStorage.removeItem('mycart_store_suspended'); } catch (e) {}
 }
 
 document.addEventListener('DOMContentLoaded', function(){ renderFeeAlert(); updateNotifBadge(); updateAdminNotifBadge(); checkSuspension(); applyHeaderDecoration(); refreshLoginNavItem(); });
