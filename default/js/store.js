@@ -5897,6 +5897,11 @@ function saveAppearance() {
   try { localStorage.setItem('mycart_appearance', JSON.stringify(data)); }
   catch(e) { showToast('مساحة التخزين ممتلئة', 'error'); return; }
   applyAppearance(data);
+  // Keep the storewide "اللون الأساسي" in sync with the saved appearance accent
+  if (data.accentColor && typeof adminSettings === 'object' && adminSettings) {
+    adminSettings.accentColor = data.accentColor;
+    try { localStorage.setItem('mycart_admin_settings', JSON.stringify(adminSettings)); } catch(e) {}
+  }
   const st = document.getElementById('appearanceStatus');
   if (st) { st.textContent = 'تم حفظ المظهر بنجاح'; st.style.color = '#10b981'; setTimeout(() => { st.textContent=''; }, 3000); }
   if (typeof adminMarkSaved === 'function') adminMarkSaved();
@@ -5984,6 +5989,14 @@ function applyPreset(key) {
   });
   fillAppearanceForm(merged);
   applyAppearance(merged);
+
+  // Sync the storewide "اللون الأساسي" (admin settings) with the theme so
+  // refreshFromCloud / applyAccentColor does not override it afterwards
+  if (typeof adminSettings === 'object' && adminSettings) {
+    adminSettings.accentColor = p.accentColor;
+    try { localStorage.setItem('mycart_admin_settings', JSON.stringify(adminSettings)); } catch(e) {}
+  }
+  if (typeof applyAccentColor === 'function') applyAccentColor(p.accentColor);
 
   // Update announcement bar colors to harmonize with preset theme
   const annBar = document.getElementById('announcementBar');
@@ -8044,7 +8057,7 @@ function updateHeaderShrink() {
   if (!header) return;
   const detail = document.getElementById('detailPage');
   const inDetail = detail && detail.classList.contains('active');
-  if (inDetail || window.scrollY > 100) {
+  if (inDetail || window.scrollY > 30) {
     header.classList.add('scrolled');
   } else if (window.scrollY < 10) {
     header.classList.remove('scrolled');
