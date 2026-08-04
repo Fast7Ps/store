@@ -58,21 +58,23 @@
   const pending = new Map();
   let flushTimer = null;
 
-  function flushPending() {
-    if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
-    if (!isConfigured || pending.size === 0) return;
-    const items = Array.from(pending.entries());
-    pending.clear();
-    items.forEach(function(entry) {
-      fetch(REST + '/rpc/save_store_data', {
-        method: 'POST',
-        headers: sbHeaders(true),
-        body: JSON.stringify({ p_store: storeId, p_key: entry[0], p_value: entry[1], p_token: SUPABASE_TOKEN })
-      }).catch(function(err) {
-        console.warn('Supabase save failed for', entry[0], err);
-      });
+function flushPending() {
+  if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
+  if (!isConfigured || pending.size === 0) return;
+  const items = Array.from(pending.entries());
+  pending.clear();
+  items.forEach(function(entry) {
+    const key = entry[0];
+    const value = entry[1];
+    fetch(REST + '/rpc/save_store_data', {
+      method: 'POST',
+      headers: sbHeaders(true),
+      body: JSON.stringify({ p_store: storeId, p_key: key, p_value: value, p_token: SUPABASE_TOKEN })
+    }).catch(function(err) {
+      console.warn('Supabase save failed for', key, err);
     });
-  }
+  });
+}
 
   function queueWrite(key, value) {
     if (!isConfigured) return;
@@ -93,6 +95,18 @@
       });
     } catch (e) { }
   });
+
+  // Also flush when the tab is hidden (covers closing/backgrounding more reliably than pagehide)
+  if (document.addEventListener) {
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden' && isConfigured && pending.size) {
+        flushPending();
+      }
+    });
+  }
+
+  // Expose a manual flush so saving code can push immediately and reliably
+  window.__supabaseFlushNow = function() { flushPending(); };
 
   // ===== Intercept localStorage to apply store namespacing dynamically =====
   const originalGetItem = localStorage.getItem;

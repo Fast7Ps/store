@@ -28,6 +28,10 @@ function loadProducts() {
 
 function saveProductsToLS() {
   try { localStorage.setItem('mycart_admin_products', JSON.stringify(products)); } catch (e) { showToast('مساحة التخزين ممتلئة، تعذر حفظ المنتجات', 'error'); }
+  // Push immediately so admin changes reach the cloud right away, not on a delayed debounce
+  if (typeof window.__supabaseFlushNow === 'function') {
+    try { window.__supabaseFlushNow(); } catch (e) {}
+  }
 }
 
 function loadAdminSettings() {
