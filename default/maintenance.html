@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>صيانة مجدولة</title>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Cairo', 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      overflow: hidden;
+    }
+
+    /* Ambient background circles */
+    .bg-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .bg-circle-1 {
+      width: 700px; height: 700px;
+      top: -250px; right: -180px;
+      background: radial-gradient(circle, rgba(37,99,235,.07), transparent 65%);
+    }
+    .bg-circle-2 {
+      width: 500px; height: 500px;
+      bottom: -150px; left: -130px;
+      background: radial-gradient(circle, rgba(16,185,129,.06), transparent 65%);
+    }
+    .bg-circle-3 {
+      width: 300px; height: 300px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(37,99,235,.04), transparent 70%);
+    }
+
+    /* Center layout */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px 60px;
+      text-align: center;
+    }
+
+    /* Card */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 32px;
+      padding: 56px 52px 48px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,.04),
+        0 4px 16px rgba(37,99,235,.06),
+        0 12px 48px rgba(37,99,235,.08);
+      animation: fadeUp .6s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Icon */
+    .icon-wrap {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      box-shadow: 0 0 0 16px rgba(37,99,235,.05);
+      animation: iconPulse 3.5s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { box-shadow: 0 0 0 16px rgba(37,99,235,.05); }
+      50%       { box-shadow: 0 0 0 26px rgba(37,99,235,.02); }
+    }
+
+    .icon-wrap svg {
+      width: 54px;
+      height: 54px;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 5px 16px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      letter-spacing: .4px;
+    }
+
+    /* Dot status */
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #2563eb;
+      animation: dotBlink 1.8s ease-in-out infinite;
+    }
+    @keyframes dotBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .3; }
+    }
+
+    /* Title */
+    h1 {
+      font-size: 2rem;
+      font-weight: 1000;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+
+    /* Description */
+    p.desc {
+      font-size: 1rem;
+      color: #64748b;
+      line-height: 1.9;
+      margin-bottom: 34px;
+    }
+
+    /* Loading dots */
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #2563eb;
+      opacity: .18;
+      animation: dotBounce 1.5s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: .24s; }
+    .dot:nth-child(3) { animation-delay: .48s; }
+
+    @keyframes dotBounce {
+      0%, 100% { transform: scale(1);    opacity: .18; }
+      50%       { transform: scale(1.6); opacity: 1; }
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e2e8f0 40%, #e2e8f0 60%, transparent);
+      margin-bottom: 24px;
+    }
+
+    /* Store footer text */
+    .store-name-tag {
+      font-size: .82rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .store-name-tag span {
+      color: #2563eb;
+      font-weight: 900;
+    }
+
+    /* Bottom watermark */
+    .watermark {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: .7rem;
+      color: #cbd5e1;
+      font-weight: 700;
+      white-space: nowrap;
+      z-index: 2;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 520px) {
+      .card {
+        padding: 40px 28px 36px;
+        border-radius: 24px;
+      }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background ambient circles -->
+  <div class="bg-wrap">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+  </div>
+
+  <div class="page">
+    <div class="card">
+
+      <!-- Icon -->
+      <div class="icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      </div>
+
+      <!-- Badge -->
+      <div class="badge">
+        <span class="badge-dot"></span>
+        صيانة مجدولة
+      </div>
+
+      <!-- Title -->
+      <h1>نحن نُحسّن<br>تجربتك!</h1>
+
+      <!-- Description -->
+      <p class="desc">
+        يقوم فريقنا التقني حالياً بأعمال صيانة وتحديثات<br>
+        لتقديم أفضل تجربة تسوّق ممكنة لك.<br>
+        سنعود قريباً بكل ما تحب!
+      </p>
+
+      <!-- Loading dots -->
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- Store name tag -->
+      <div class="store-name-tag" id="storeNameTag">
+        نشكرك على صبرك وتفهمك
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FAST7 watermark -->
+  <div class="watermark">مدعوم بمنصة FAST7 Commerce</div>
+
+  <script>
+    // Show store name if available
+    (function() {
+      var name = localStorage.getItem('mycart_store_name');
+      if (name) {
+        document.getElementById('storeNameTag').innerHTML =
+          'متجر <span>' + name + '</span> · نشكرك على صبرك وتفهمك';
+        document.title = name + ' — صيانة مجدولة';
+      }
+
+      // If suspension was lifted while user was on this page, redirect back
+      function checkIfResolved() {
+        if (localStorage.getItem('mycart_store_suspended') !== 'true') {
+          window.location.replace('index.html');
+        }
+      }
+      setInterval(checkIfResolved, 4000);
+    })();
+  </script>
+
+</body>
+</html>

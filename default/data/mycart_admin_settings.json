@@ -1,0 +1,36 @@
+{
+  "storeName": "العثماني بلس",
+  "tagline": "كل ما يلزم البيت تحت صقف واحد",
+  "phone": "0568313507",
+  "whatsapp": "0568313507",
+  "email": "saifpsx@gmail.com",
+  "address": "الخليل - عقبة تفوح",
+  "hours": "مثال: السبت - الخميس 9ص - 10م",
+  "lat": "31.531300",
+  "lng": "35.087200",
+  "logoDisplayMode": "both",
+  "scrolledHeader": "logo",
+  "wholesaleCode": "ADMIN123",
+  "wholesaleDiscount": 15,
+  "currency": "₪",
+  "accentColor": "#4a5759",
+  "lang": "ar",
+  "logo": "https://i.ibb.co/PGQvXNTX/40c223bcc32d.webp",
+  "showStoreCard": true,
+  "social": {
+    "facebook": "https://www.facebook.com/fast7",
+    "instagram": "https://www.facebook.com/fast7",
+    "twitter": "https://www.facebook.com/fast7",
+    "tiktok": "https://www.facebook.com/fast7",
+    "youtube": "https://www.facebook.com/fast7",
+    "telegram": "https://www.facebook.com/fast7",
+    "snapchat": "https://www.facebook.com/fast7",
+    "website": "https://www.facebook.com"
+  },
+  "storeImages": [
+    "https://i.ibb.co/zhMRqW8N/a36c588903dc.jpg",
+    "https://i.ibb.co/hRk4CCWR/ce174355ead7.jpg",
+    "https://i.ibb.co/Q3Ky89tn/ed41afda1f08.jpg",
+    "https://i.ibb.co/yc10bssC/111949d2b407.jpg"
+  ]
+}

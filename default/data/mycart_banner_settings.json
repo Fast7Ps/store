@@ -1,0 +1,12 @@
+{
+  "layout": "slider",
+  "sliderStyle": "default",
+  "sliderEffect": "blur",
+  "heroStyle": "grid",
+  "sliderCounter": "show",
+  "autoplay": true,
+  "interval": 4000,
+  "aspectRatio": "2.5/1",
+  "borderRadius": "14px",
+  "objectFit": "contain"
+}
