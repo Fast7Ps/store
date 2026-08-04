@@ -7891,8 +7891,10 @@ function updateAdminNotifBadge() {
 }
 
 function checkSuspension() {
-  var d = localStorage.getItem('mycart_fee_threshold_date');
-  if (d && new Date() > new Date(d)) { localStorage.setItem('mycart_store_suspended', 'true'); }
+  // مصدر الحقيقة الوحيد الآن هو لوحة التحكم (نعم: panel-link.js).
+  // هذا المنطق القديم (رسوم الخطة المجانية عبر localStorage) أصبح متعارضاً
+  // مع لوحة إدارة الشركة، لذا نعطّله لتفادي إغلاق المتجر بالخطأ.
+  // (يبقى فقط مرهوناً بحالة اللوحة المحدَّدة في panel-link.js)
   if (localStorage.getItem('mycart_store_suspended') === 'true' && !window.location.pathname.includes('maintenance.html')) {
     window.location.replace('maintenance.html');
   }

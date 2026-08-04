@@ -1,19 +1,20 @@
 // =============================================================
 // FAST7 — ربط المتجر بلوحة التحكم الرئيسية (panel)
 //
-// يتحقق هذا الملف من حالة المتجر لدى "سحابة الشركة" (master DB
-// الخاصة بلوحة التحكم) ويحوّل المتجر لصفحة الصيانة إذا كانت
-// الحالة "suspended" أو "pending".
+// مصدر الحقيقة الوحيد: لوحة التحكم (سحابة الشركة).
+//  - الحالة = suspended  -> ضع العلامة وانتقل لصفحة الصيانة
+//  - الحالة = active     -> امسح العلامة وعد للمتجر
 //
-// البيانات اللازمة: عنوان سحابة الشركة + مفتاح anon العام الخاص
-// باللوحة (من js/config.js في مجلد اللوحة).
+// يعمل هذا الملف على صفحتَي المتجر (index.html) والصيانة
+// (maintenance.html)، ويفحص دورياً حتى نرصد التغييرات فوراً.
 // =============================================================
 (function () {
-  // نقطة الإعداد الوحيدة — املأ عنوان سحابة اللوحة الرئيسية ومفتاحها
   var PANEL_URL = 'https://scmgwkabtybtrmxdqniz.supabase.co';  // Master (لوحة التحكم)
   var PANEL_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbWd3a2FidHlidHJteGRxbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjA3NDcsImV4cCI6MjEwMTQzNjc0N30.Lwqif_ViU7XJoO_zz_wovovOroIYvqpg3m0CJaCmi5w';
 
-  // storeId: يستخرجه من المسار إن وُجد، أو من الإعداد الافتراضي
+  var CHECK_MS = 8000; // كل 8 ثوانٍ نتحقق من الحالة
+  var done = false;
+
   function getStoreId() {
     var p = window.location.pathname.split('/');
     var idx = p.indexOf('stores');
@@ -23,18 +24,26 @@
   }
   var STORE_ID = getStoreId();
 
-  var RUN_KEY = 'mycart_panel_check_done';
+  function onMaintenancePage() {
+    return window.location.pathname.indexOf('maintenance.html') !== -1;
+  }
 
-  async function checkPanelStatus() {
-    // لاعدم تكرار الفحص بلا فائدة، ضع علامة لنفس الجلسة
-    if (sessionStorage.getItem(RUN_KEY)) return;
-    sessionStorage.setItem(RUN_KEY, '1');
+  function apply(result) {
+    if (result.suspended) {
+      // موقوف -> تأكد من العلامة وانتقل للصيانة (مرة واحدة فقط)
+      localStorage.setItem('mycart_store_suspended', 'true');
+      if (!onMaintenancePage()) window.location.replace('maintenance.html');
+    } else {
+      // نشط -> امسح العلامة وعد للمتجر (مرة واحدة فقط)
+      localStorage.removeItem('mycart_store_suspended');
+      if (onMaintenancePage()) window.location.replace('index.html');
+    }
+  }
 
-    // تجاهل عند الفتح محلياً (file://) أو صفحة الصيانة نفسها
+  async function tick() {
     var isHttp = /^https?:$/.test(window.location.protocol || '');
-    if (!isHttp) return;
-    if (window.location.pathname.indexOf('maintenance.html') !== -1) return;
-
+    if (!isHttp) return;                  // file:// نتركه يعمل محلياً
+    if (done) return;                     // الصفحة في مرحلة انتقال تنتهي قريباً
     try {
       var res = await fetch(PANEL_URL.replace(/\/+$/, '') + '/rest/v1/rpc/get_store_status', {
         method: 'POST',
@@ -45,25 +54,25 @@
         },
         body: JSON.stringify({ p_store: STORE_ID })
       });
-      if (!res.ok) return; // إن تعذّر الاتصال أو غاب المتجر، لا تغلق المتجر
+      if (!res.ok) return;
       var rows = await res.json();
       if (!rows || !rows.length) return;
-
-      if (rows[0].suspended) {
-        localStorage.setItem('mycart_store_suspended', 'true');
-        if (window.location.pathname.indexOf('maintenance.html') === -1) {
-          window.location.replace('maintenance.html');
-        }
-      }
+      apply(rows[0]);
     } catch (e) {
-      // بدون إنترنت: لا تفعل شيئاً (المتجر يبقى يعمل)
-      console.warn('Panel check failed:', e);
+      // بلا إنترنت: لا نفعل شيئاً (المتجر يبقى على حاله)
     }
   }
 
+  function start() {
+    // فحص فوري عند فتح الصفحة
+    tick();
+    // ثم بشكل دوري لرصد تغيّر الحالة من اللوحة
+    setInterval(tick, CHECK_MS);
+  }
+
   if (window.addEventListener) {
-    window.addEventListener('DOMContentLoaded', checkPanelStatus);
+    window.addEventListener('DOMContentLoaded', start);
   } else {
-    checkPanelStatus();
+    start();
   }
 })();
