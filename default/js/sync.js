@@ -8,7 +8,8 @@
     'mycart_read_notifications',
     'mycart_admin_logged',
     'mycart_wholesale',
-    'mycart_store_images_temp'
+    'mycart_store_images_temp',
+    'mycart_store_suspended'
   ];
 
   // Extract storeId from the URL pathname (e.g., /stores/watches/ -> watches)
