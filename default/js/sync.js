@@ -131,6 +131,10 @@ function flushPending() {
 
     // Sync config-related mycart_ keys with Supabase
     if (key.startsWith('mycart_') && !EXCLUDED_KEYS.includes(key) && !window.__syncingFromCloud) {
+      if (isConfigured && !window.__supabasePreloaded) {
+        // Skip syncing default values to cloud during initial load
+        return;
+      }
       let parsedValue;
       try {
         parsedValue = JSON.parse(value);
@@ -232,6 +236,49 @@ function flushPending() {
           window.__syncingFromCloud = true;
           originalSetItem.call(localStorage, getNamespacedKey('mycart_store_notifications'), strVal);
           window.__syncingFromCloud = false;
+
+          // Parse new notification to show sound + browser notification
+          try {
+            var newList = Array.isArray(cl) ? cl : JSON.parse(strVal);
+            var oldList = localRaw ? JSON.parse(localRaw) : [];
+            if (Array.isArray(newList) && newList.length > (Array.isArray(oldList) ? oldList.length : 0)) {
+              var newest = newList[0]; // newest is first
+
+              // 1. Play a pleasant chime sound
+              try {
+                var ac = new (window.AudioContext || window.webkitAudioContext)();
+                var notes = [880, 1100, 1320];
+                notes.forEach(function(freq, i) {
+                  var o = ac.createOscillator();
+                  var g = ac.createGain();
+                  o.connect(g); g.connect(ac.destination);
+                  o.type = 'sine';
+                  o.frequency.value = freq;
+                  g.gain.setValueAtTime(0, ac.currentTime + i * 0.12);
+                  g.gain.linearRampToValueAtTime(0.18, ac.currentTime + i * 0.12 + 0.04);
+                  g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + i * 0.12 + 0.22);
+                  o.start(ac.currentTime + i * 0.12);
+                  o.stop(ac.currentTime + i * 0.12 + 0.25);
+                });
+              } catch(e) {}
+
+              // 2. Show browser push notification
+              var notifTitle = (newest && newest.title) ? newest.title : 'إشعار جديد من الشركة';
+              var notifBody  = (newest && newest.message) ? newest.message : '';
+              if (window.Notification) {
+                if (Notification.permission === 'granted') {
+                  new Notification(notifTitle, { body: notifBody, icon: 'img/icon.png', dir: 'rtl' });
+                } else if (Notification.permission !== 'denied') {
+                  Notification.requestPermission().then(function(perm) {
+                    if (perm === 'granted') {
+                      new Notification(notifTitle, { body: notifBody, icon: 'img/icon.png', dir: 'rtl' });
+                    }
+                  });
+                }
+              }
+            }
+          } catch(e) {}
+
           if (typeof window.updateNotifBadge === 'function') { try { window.updateNotifBadge(); } catch(e){} }
         }
       }
@@ -296,8 +343,9 @@ function flushPending() {
         } catch (e) { }
       }
     } catch (err) {
-      console.warn('Supabase load failed, using static fallback:', err);
-      loadStaticFallback();
+      console.warn('Supabase load failed:', err);
+    } finally {
+      window.__supabasePreloaded = true;
     }
   }
 

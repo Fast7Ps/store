@@ -1805,7 +1805,7 @@ function adminRenderMarketing(subTab = 'seo') {
       </div>
       <div class="admin-card" style="grid-column:1/-1"><h4>📱 تحويل الطلبات تلقائياً إلى واتساب</h4>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="admMktWaNotifShow" style="width:16px;height:16px" ${data.waNotif?.show !== false ? 'checked' : ''}> 📱 تحويل العميل للواتساب تلقائياً بعد إتمام الطلب
+          <input type="checkbox" id="admMktWaNotifShow" style="width:16px;height:16px" ${data.waNotif?.show === true ? 'checked' : ''}> 📱 تحويل العميل للواتساب تلقائياً بعد إتمام الطلب
         </label>
         <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0">يفتح تطبيق واتساب بالرسالة وتفاصيل الفاتورة فور نقر المشتري على "إتمام الطلب" لتأكيد سريع.</p>
     </div>`;
@@ -1908,7 +1908,7 @@ function adminRenderMarketing(subTab = 'seo') {
       </div>
       <div class="admin-card"><h4>💬 زر الشراء السريع عبر واتساب</h4>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="admMktWaCheckoutShow" style="width:16px;height:16px" ${data.waCheckout?.show ? 'checked' : ''}> تفعيل زر الطلب المباشر عبر واتساب
+          <input type="checkbox" id="admMktWaCheckoutShow" style="width:16px;height:16px" ${data.waCheckout?.show !== false ? 'checked' : ''}> تفعيل زر الطلب المباشر عبر واتساب
         </label>
         <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0">يضيف زراً أخضر واضحاً في صفحة المنتج للشراء عبر واتساب فوراً.</p>
       </div>
@@ -3013,8 +3013,71 @@ function adminRenderOrderEditPage() {
 /* ── Subscription ── */
 function adminRenderSubscriptionTab() {
   var container = document.getElementById('admin-subscription');
+  var balance = parseFloat(localStorage.getItem('mycart_store_balance')) || 0;
   if (!container) return;
   var info = getFeeInfo();
+  
+  // Subscription expiry countdown
+  var subExpiry = localStorage.getItem('mycart_subscription_expiry');
+  
+  // Check if auto-downgrade scheduled is due
+  var pendingDowngrade = localStorage.getItem('mycart_subscription_pending_downgrade') === 'true';
+  if (subExpiry && pendingDowngrade && info.plan !== 'free') {
+    if (new Date() >= new Date(subExpiry)) {
+      localStorage.setItem('mycart_subscription_plan', 'free');
+      localStorage.removeItem('mycart_subscription_expiry');
+      localStorage.removeItem('mycart_subscription_start');
+      localStorage.removeItem('mycart_subscription_pending_downgrade');
+      localStorage.setItem('mycart_free_orders_count', '0');
+      if (typeof window.queueWrite === 'function') {
+        window.queueWrite('mycart_subscription_plan', 'free');
+        window.queueWrite('mycart_free_orders_count', 0);
+      }
+      info = getFeeInfo();
+      subExpiry = null;
+      pendingDowngrade = false;
+    }
+  }
+
+  if (!subExpiry && info.plan !== 'free') {
+    var now = new Date();
+    var expiry = new Date(now);
+    if (info.plan === 'monthly') { expiry.setDate(expiry.getDate() + 30); }
+    else if (info.plan === 'annual') { expiry.setFullYear(expiry.getFullYear() + 1); }
+    localStorage.setItem('mycart_subscription_expiry', expiry.toISOString());
+    subExpiry = expiry.toISOString();
+  }
+
+  var daysRemaining = null;
+  var expiryStr = '';
+  var isExpired = false;
+  
+  if (subExpiry && info.plan !== 'free') {
+    var expDate = new Date(subExpiry);
+    var msLeft = expDate - new Date();
+    daysRemaining = Math.ceil(msLeft / 86400000);
+    
+    if (daysRemaining <= 0) {
+      // 3 Days Grace Period (مهلة سماح)
+      var graceMs = (new Date() - expDate);
+      var graceDaysPassed = Math.floor(graceMs / 86400000);
+      var graceDaysLeft = 3 - graceDaysPassed;
+      if (graceDaysLeft > 0) {
+        expiryStr = '⚠️ مهلة سماح: ' + graceDaysLeft + ' يوم';
+        localStorage.removeItem('mycart_store_suspended');
+      } else {
+        isExpired = true;
+        expiryStr = '❌ منتهي وموقف';
+        localStorage.setItem('mycart_store_suspended', 'true');
+      }
+    } else if (daysRemaining <= 7) {
+      expiryStr = '🔴 ' + daysRemaining + ' يوم متبقي' + (pendingDowngrade ? ' (مجدول مجاني)' : '');
+    } else if (daysRemaining <= 14) {
+      expiryStr = '🟡 ' + daysRemaining + ' يوم متبقي' + (pendingDowngrade ? ' (مجدول مجاني)' : '');
+    } else {
+      expiryStr = '🟢 ' + daysRemaining + ' يوم متبقي' + (pendingDowngrade ? ' (مجدول مجاني)' : '');
+    }
+  }
   var plans = { free:'مجانية', monthly:'شهرية', annual:'سنوية VIP' };
   var planLabel = plans[info.plan] || info.plan;
   var isFree = info.plan === 'free';
@@ -3037,8 +3100,13 @@ function adminRenderSubscriptionTab() {
     + (isFree ? '<div class="sub-hero-stat"><div class="label">الرسوم المتراكمة</div><div class="value" style="color:'+statusColor+'">'+info.accrued+' / '+info.limit+' ₪</div></div>' : '<div class="sub-hero-stat"><div class="label">حالة العمولات</div><div class="value" style="color:#10b981">0 ₪ (إعفاء)</div></div>')
     + '<div class="sub-hero-stat"><div class="label">الحالة</div><div class="value" style="color:'+(daysLeft && daysLeft.indexOf('منتهي')>=0 ? '#ef4444' : '#10b981')+'">'+(daysLeft && daysLeft.indexOf('منتهي')>=0 ? 'موقوف' : 'نشط')+'</div></div>'
     + (daysLeft ? '<div class="sub-hero-stat"><div class="label">المهلة</div><div class="value" style="color:'+statusColor+'">'+daysLeft+'</div></div>' : '')
+    + (expiryStr ? '<div class="sub-hero-stat" style="background:'+(isExpired?'#fef2f2':daysRemaining<=7?'#fef9c3':'#f0fdf4')+';border-radius:10px"><div class="label" style="color:'+(isExpired?'#991b1b':'#166534')+'">انتهاء الاشتراك</div><div class="value" style="color:'+(isExpired?'#ef4444':daysRemaining<=7?'#d97706':'#10b981')+';font-size:.82rem">'+expiryStr+'</div></div>' : '')
     + '</div></div></div>'
     + (isFree && info.accrued > 0 ? '<div class="sub-fee-bar"><div style="display:flex;justify-content:space-between;align-items:center"><div><span style="font-weight:800;font-size:.8rem;color:#0f172a">استهلاك حد الطلبات</span><br><span style="font-size:.65rem;color:#64748b">'+info.accrued+' ₪ من أصل '+info.limit+' ₪</span>'+(daysLeft?'<span style="font-size:.68rem;font-weight:900;color:#ef4444"> • '+daysLeft+'</span>':'')+'</div><span style="font-size:1rem;font-weight:1000;color:'+statusColor+'">'+pct+'%</span></div><div class="track"><div class="fill" style="width:'+pct+'%;background:'+statusColor+'"></div></div>'+(info.accrued>=info.limit?'<button onclick="paySubscriptionFees();setTimeout(adminRenderSubscriptionTab,300)" style="width:100%;margin-top:10px;padding:9px;border:none;border-radius:10px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;font-weight:900;font-size:.78rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 10px rgba(6,182,212,.25)"><i class="fa-solid fa-wallet" style="font-size:1rem"></i> تسديد '+info.accrued+' ₪ الآن</button>':'')+'</div>' : '')
+    + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center">'
+    + '<div><h4 style="font-weight:900;margin:0 0 4px;font-size:.82rem;color:#0f172a">رصيد المتجر الحالي</h4><div style="font-size:1.35rem;font-weight:1000;color:#10b981">' + balance + ' ₪</div></div>'
+    + '<button onclick="chargeStoreCredit();setTimeout(adminRenderSubscriptionTab,500)" style="padding:8px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:800;font-size:.78rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(16,185,129,0.25)">+ شحن رصيد</button>'
+    + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
     // Free
     + '<div class="sub-plan-card'+(info.plan==='free'?' active':'')+'">'
@@ -3089,6 +3157,77 @@ function addSubscriptionLog(action, details) {
 function adminSwitchPlan(plan) {
   var plans = { free:'مجانية', monthly:'شهرية', annual:'سنوية VIP' };
   if (plan === localStorage.getItem('mycart_subscription_plan')) { showAlertModal('أنت مشترك في هذه الخطة بالفعل.'); return; }
+  
+  // Prevent upgrading/changing plan if there are outstanding fees
+  var info = getFeeInfo();
+  if (info.plan === 'free' && info.accrued > 0 && plan !== 'free') {
+    // Show upgrade-blocked dialog with direct payment options
+    var balance = parseFloat(localStorage.getItem('mycart_store_balance')) || 0;
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease';
+    var canPayBalance = balance >= info.accrued;
+    ov.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:370px;width:100%;box-shadow:0 25px 80px rgba(0,0,0,.35);animation:slideUp .3s cubic-bezier(.22,1,.36,1);padding:26px 22px 20px;text-align:center">' +
+      '<div style="width:52px;height:52px;border-radius:50%;background:#fef9c3;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem">⚠️</div>' +
+      '<h3 style="font-size:.95rem;font-weight:900;margin:0 0 6px;color:#0f172a">رسوم مستحقة بذمتك</h3>' +
+      '<p style="font-size:.8rem;color:#64748b;margin:0 0 18px;line-height:1.7">لديك رسوم متراكمة بقيمة <strong style="color:#ef4444">' + info.accrued + ' ₪</strong><br>يجب تسديدها أولاً للترقية.</p>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' +
+        (canPayBalance
+          ? '<button id="blockPayBal" style="width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.82rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-wallet"></i> تسديد من رصيد المتجر (' + balance + ' ₪)</button>'
+          : '<button disabled style="width:100%;padding:11px;border:none;border-radius:12px;background:#e2e8f0;color:#94a3b8;font-weight:900;font-size:.82rem;cursor:not-allowed;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-wallet"></i> رصيد غير كافٍ (' + balance + ' ₪)</button>'
+        ) +
+        '<button id="blockPayCode" style="width:100%;padding:11px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;color:#475569;font-weight:800;font-size:.82rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-key"></i> استخدام كود دفع من الشركة</button>' +
+        '<button id="blockCancel" style="padding:8px;border:none;background:transparent;color:#94a3b8;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit">إلغاء</button>' +
+      '</div></div>';
+    ov.onclick = function(e) { if (e.target === ov) document.body.removeChild(ov); };
+    document.body.appendChild(ov);
+    document.getElementById('blockCancel').onclick = function() { document.body.removeChild(ov); };
+    document.getElementById('blockPayCode').onclick = function() { document.body.removeChild(ov); paySubscriptionFees(true); };
+    if (canPayBalance) {
+      document.getElementById('blockPayBal').onclick = async function() {
+        var btn = document.getElementById('blockPayBal');
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الخصم...';
+        try {
+          // Audio chime
+          try { var ac = new (window.AudioContext||window.webkitAudioContext)(); var o=ac.createOscillator(),g=ac.createGain(); o.connect(g);g.connect(ac.destination);o.frequency.value=1100;g.gain.value=0.2;o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.15);o.stop(ac.currentTime+0.15); } catch(e) {}
+          var newBal = balance - info.accrued;
+          localStorage.setItem('mycart_store_balance', String(newBal));
+          if (typeof window.queueWrite==='function') window.queueWrite('mycart_store_balance', newBal);
+          localStorage.removeItem('mycart_fee_threshold_date');
+          localStorage.removeItem('mycart_store_suspended');
+          localStorage.setItem('mycart_free_orders_count','0');
+          if (typeof window.queueWrite==='function') window.queueWrite('mycart_free_orders_count',0);
+          var log=[]; try{log=JSON.parse(localStorage.getItem('mycart_subscription_log')||'[]');}catch(e){}
+          log.push({action:'payment',plan:'free',amount:info.accrued,code:'رصيد المحفظة',date:new Date().toLocaleString('ar-SA')});
+          try{localStorage.setItem('mycart_subscription_log',JSON.stringify(log));}catch(e){}
+          document.body.removeChild(ov);
+          showAlertModal('✅ تم تسديد ' + info.accrued + ' ₪ من رصيد متجرك. يمكنك الآن الترقية!');
+          setTimeout(function(){ adminSwitchPlan(plan); }, 800);
+        } catch(err) {
+          btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-wallet"></i> تسديد من رصيد المتجر';
+        }
+      };
+    }
+    return;
+  }
+  
+  if (plan === 'free') {
+    var subExpiry = localStorage.getItem('mycart_subscription_expiry');
+    if (subExpiry && info.plan !== 'free') {
+      var expDate = new Date(subExpiry);
+      if (expDate > new Date()) {
+        localStorage.setItem('mycart_subscription_pending_downgrade', 'true');
+        showAlertModal('✅ تم جدولة التبديل إلى الخطة المجانية بنجاح. ستظل خطتك الحالية نشطة حتى تاريخ الانتهاء (' + expDate.toLocaleDateString('ar-SA') + ') ثم تتحول تلقائياً للمجانية دون خسارة أي يوم مدفوع.');
+        adminRenderSubscriptionTab();
+        return;
+      }
+    }
+  }
+  
+  // If they upgrade to a paid plan, remove any pending downgrade flag
+  if (plan !== 'free') {
+    localStorage.removeItem('mycart_subscription_pending_downgrade');
+  }
+  
   showSubscriptionCodeModal(plan);
 }
 function getMyStoreKey() {
@@ -3129,36 +3268,70 @@ function showSubscriptionCodeModal(plan) {
   document.getElementById('subCodeInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') verifySubscriptionCode(plan, overlay); });
   setTimeout(function(){ var inp = document.getElementById('subCodeInput'); if (inp) inp.focus(); }, 60);
 }
-function verifySubscriptionCode(plan, overlay) {
+async function verifySubscriptionCode(plan, overlay) {
   var plans = { free:'مجانية', monthly:'شهرية', annual:'سنوية VIP' };
   var inp = document.getElementById('subCodeInput');
   var err = document.getElementById('subCodeError');
-  var code = (inp.value || '').trim();
+  var code = (inp.value || '').trim().toUpperCase();
   if (!code) { if (err) { err.style.display = 'block'; err.textContent = 'يرجى إدخال كود التفعيل.'; } return; }
-  var codes = [];
-  try { codes = JSON.parse(localStorage.getItem('fast7_subscription_codes') || '[]'); } catch(e){}
-  var myId = getMyStoreKey();
-  var mySub = (localStorage.getItem('mycart_store_subdomain') || '').toLowerCase();
-  var foundIdx = -1;
-  for (var i = 0; i < codes.length; i++) {
-    var c = codes[i];
-    if (!c || c.used) continue;
-    if (String(c.code).trim().toUpperCase() !== code.toUpperCase()) continue;
-    if (c.plan !== plan) continue;
-    var st = String(c.storeId || '');
-    if (st === myId || st === 'default' || (mySub && st === mySub)) { foundIdx = i; break; }
+
+  var goBtn = document.getElementById('subCodeGo');
+  if (goBtn) { goBtn.disabled = true; goBtn.textContent = 'جارٍ التحقق...'; }
+  if (err) err.style.display = 'none';
+
+  try {
+    var masterUrl = 'https://scmgwkabtybtrmxdqniz.supabase.co';
+    var masterKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbWd3a2FidHlidHJteGRxbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjA3NDcsImV4cCI6MjEwMTQzNjc0N30.Lwqif_ViU7XJoO_zz_wovovOroIYvqpg3m0CJaCmi5w';
+    var myId = getMyStoreKey();
+
+    var resp = await fetch(masterUrl + '/rest/v1/rpc/verify_and_use_code', {
+      method: 'POST',
+      headers: {
+        'apikey': masterKey,
+        'Authorization': 'Bearer ' + masterKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        p_code: code,
+        p_store_id: myId,
+        p_plan: plan
+      })
+    });
+
+    if (!resp.ok) {
+      var errTxt = await resp.text();
+      throw new Error(errTxt || ('HTTP ' + resp.status));
+    }
+
+    var result = await resp.json();
+    if (!result.ok) {
+      if (err) { err.style.display = 'block'; err.textContent = result.msg; }
+      return;
+    }
+
+    if (overlay && overlay.parentNode) document.body.removeChild(overlay);
+    var oldPlan = localStorage.getItem('mycart_subscription_plan') || 'free';
+    localStorage.setItem('mycart_subscription_plan', plan);
+    if (plan !== 'free') {
+      localStorage.removeItem('mycart_free_orders_count');
+      localStorage.removeItem('mycart_fee_threshold_date');
+      localStorage.removeItem('mycart_store_suspended');
+      // Store activation date and expiry for countdown
+      var now = new Date();
+      var expiry = new Date(now);
+      if (plan === 'monthly') { expiry.setDate(expiry.getDate() + 30); }
+      else if (plan === 'annual') { expiry.setFullYear(expiry.getFullYear() + 1); }
+      localStorage.setItem('mycart_subscription_start', now.toISOString());
+      localStorage.setItem('mycart_subscription_expiry', expiry.toISOString());
+    }
+    addSubscriptionLog('plan_change', 'التبديل من '+(plans[oldPlan]||oldPlan)+' ← '+plans[plan]+' (عبر كود التفعيل)');
+    showAlertModal('✅ ' + result.msg);
+    adminRenderSubscriptionTab();
+  } catch (e) {
+    if (err) { err.style.display = 'block'; err.textContent = 'فشل الاتصال بخادم التفعيل: ' + e.message; }
+  } finally {
+    if (goBtn) { goBtn.disabled = false; goBtn.textContent = 'تفعيل الاشتراك'; }
   }
-  if (foundIdx === -1) { if (err) { err.style.display = 'block'; err.textContent = 'الكود غير صحيح أو غير صالح لهذه الخطة.'; } return; }
-  codes[foundIdx].used = true;
-  codes[foundIdx].usedAt = new Date().toLocaleString('ar-SA');
-  try { localStorage.setItem('fast7_subscription_codes', JSON.stringify(codes)); } catch(e){}
-  if (overlay && overlay.parentNode) document.body.removeChild(overlay);
-  var oldPlan = localStorage.getItem('mycart_subscription_plan') || 'free';
-  localStorage.setItem('mycart_subscription_plan', plan);
-  if (plan !== 'free') { localStorage.removeItem('mycart_free_orders_count'); localStorage.removeItem('mycart_fee_threshold_date'); localStorage.removeItem('mycart_store_suspended'); }
-  addSubscriptionLog('plan_change', 'التبديل من '+(plans[oldPlan]||oldPlan)+' ← '+plans[plan]+' (عبر كود التفعيل)');
-  showAlertModal('✅ تم تفعيل '+plans[plan]+' بنجاح!');
-  adminRenderSubscriptionTab();
 }
 function openSubscriptionSheet() {
   var sheet = document.getElementById('subscriptionSheet');
@@ -3177,7 +3350,14 @@ function openSubscriptionSheet() {
   var suspDate = localStorage.getItem('mycart_fee_threshold_date');
   var daysLeft = '';
   if (suspDate && isFree) { var diff = Math.ceil((new Date(suspDate) - new Date()) / 86400000); daysLeft = diff > 0 ? 'مهلة '+diff+' يوم' : '⚠️ منتهي!'; }
+  
+  var balance = parseFloat(localStorage.getItem('mycart_store_balance')) || 0;
+  
   cnt.innerHTML = '<div style="padding:4px 0">'
+    + '<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.03);display:flex;justify-content:space-between;align-items:center">'
+    + '<div><h4 style="font-weight:900;margin:0 0 4px;font-size:.82rem;color:#0f172a">رصيد المتجر الحالي</h4><div style="font-size:1.35rem;font-weight:1000;color:#10b981">' + balance + ' ₪</div></div>'
+    + '<button onclick="chargeStoreCredit()" style="padding:8px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:800;font-size:.78rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(16,185,129,0.25)">+ شحن رصيد</button>'
+    + '</div>'
     + '<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.03)">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">'
     + '<div><h3 style="font-size:1.1rem;font-weight:1000;margin:0;color:#0f172a">'+planLabel+'</h3><p style="font-size:.72rem;color:#64748b;margin:0">'+(isFree?'الخطة المجانية • رسم '+freeFee+' ₪ لكل طلب':'إعفاء من عمولات الطلبات')+'</p></div>'
@@ -5628,4 +5808,120 @@ function showOptImgChooser(imgEl) {
   };
   
   document.body.appendChild(overlay);
+}
+
+
+function chargeStoreCredit() {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:71000;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease';
+  overlay.innerHTML = '<div style="background:var(--card,#fff);border-radius:20px;max-width:400px;width:100%;box-shadow:0 25px 80px rgba(0,0,0,.35);animation:slideUp .3s cubic-bezier(.22,1,.36,1);padding:24px;text-align:center">'
+    + '<div style="width:52px;height:52px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.5rem;color:#10b981"><i class="fa-solid fa-wallet"></i></div>'
+    + '<h3 style="font-size:1rem;font-weight:900;margin:0 0 4px;color:var(--text,#1e293b)">شحن رصيد المتجر</h3>'
+    + '<p style="font-size:.78rem;color:var(--text-muted,#64748b);margin:0 0 12px">أدخل كود شحن الرصيد لتعبئة رصيد متجرك</p>'
+    + '<input id="creditCodeInput" type="text" dir="ltr" placeholder="أدخل كود الشحن..." style="width:100%;padding:11px 12px;border:2px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:.9rem;text-align:center;letter-spacing:2px;margin-bottom:8px;background:#fff;color:#0f172a">'
+    + '<div id="creditCodeError" style="display:none;color:#ef4444;font-size:.75rem;font-weight:700;margin-bottom:8px">الكود غير صحيح.</div>'
+    + '<button id="creditCodeGo" style="width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.85rem;cursor:pointer;font-family:inherit">شحن الآن</button>'
+    + '<button id="creditCodeCancel" style="width:100%;margin-top:8px;padding:9px;border:none;border-radius:10px;background:transparent;color:var(--text-muted,#64748b);font-weight:700;font-size:.8rem;cursor:pointer;font-family:inherit">إلغاء</button>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  
+  var goBtn = document.getElementById('creditCodeGo');
+  var cancelBtn = document.getElementById('creditCodeCancel');
+  var inp = document.getElementById('creditCodeInput');
+  var err = document.getElementById('creditCodeError');
+
+  setTimeout(function(){ if (inp) inp.focus(); }, 60);
+
+  overlay.onclick = function(e){ if (e.target === overlay && overlay.parentNode) { document.body.removeChild(overlay); } };
+  cancelBtn.onclick = function(){ if (overlay.parentNode) document.body.removeChild(overlay); };
+  
+  goBtn.onclick = async function() {
+    var code = (inp.value || '').trim().toUpperCase();
+    if (!code) { if (err) { err.style.display = 'block'; err.textContent = 'يرجى إدخال كود الشحن.'; } return; }
+
+    goBtn.disabled = true;
+    goBtn.textContent = 'جارٍ التحقق...';
+    if (err) err.style.display = 'none';
+
+    try {
+      var masterUrl = 'https://scmgwkabtybtrmxdqniz.supabase.co';
+      var masterKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbWd3a2FidHlidHJteGRxbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NjA3NDcsImV4cCI6MjEwMTQzNjc0N30.Lwqif_ViU7XJoO_zz_wovovOroIYvqpg3m0CJaCmi5w';
+      
+      var pathParts = window.location.pathname.split('/');
+      var storesIdx = pathParts.indexOf('stores');
+      var myId = (storesIdx !== -1 && pathParts[storesIdx+1]) ? pathParts[storesIdx+1] : 'default';
+
+      var resp = await fetch(masterUrl + '/rest/v1/rpc/verify_and_use_credit_code', {
+        method: 'POST',
+        headers: {
+          'apikey': masterKey,
+          'Authorization': 'Bearer ' + masterKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          p_code: code,
+          p_store_id: myId
+        })
+      });
+
+      if (!resp.ok) {
+        var errTxt = await resp.text();
+        throw new Error(errTxt || ('HTTP ' + resp.status));
+      }
+
+      var result = await resp.json();
+      if (!result.ok) {
+        if (err) { err.style.display = 'block'; err.textContent = result.msg; }
+        return;
+      }
+
+      var currentBal = parseFloat(localStorage.getItem('mycart_store_balance')) || 0;
+      var added = parseFloat(result.amount) || 0;
+      var newBal = currentBal + added;
+      localStorage.setItem('mycart_store_balance', String(newBal));
+
+      // Sync immediately using sync.js's window.queueWrite if available
+      if (typeof window.queueWrite === 'function') {
+        window.queueWrite('mycart_store_balance', newBal);
+      }
+
+      addSubscriptionLog('credit_charge', 'شحن رصيد: +' + added + ' ₪ (الكود: ' + code + ')');
+
+      // Play success chime sound
+      try {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc1 = audioCtx.createOscillator();
+        var gain1 = audioCtx.createGain();
+        osc1.connect(gain1); gain1.connect(audioCtx.destination);
+        osc1.frequency.value = 1100; gain1.gain.value = 0.2;
+        osc1.start();
+        gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        osc1.stop(audioCtx.currentTime + 0.15);
+        
+        setTimeout(function() {
+          try {
+            var osc2 = audioCtx.createOscillator();
+            var gain2 = audioCtx.createGain();
+            osc2.connect(gain2); gain2.connect(audioCtx.destination);
+            osc2.frequency.value = 1500; gain2.gain.value = 0.2;
+            osc2.start();
+            gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+            osc2.stop(audioCtx.currentTime + 0.25);
+          } catch(e) {}
+        }, 90);
+      } catch(e) {}
+
+      if (overlay.parentNode) document.body.removeChild(overlay);
+      showAlertModal('✅ تم شحن رصيد بقيمة ' + added + ' ₪ بنجاح!');
+      if (typeof adminRenderSubscriptionTab === 'function') {
+        adminRenderSubscriptionTab();
+      }
+      setTimeout(function(){ openSubscriptionSheet(); }, 500);
+    } catch (e) {
+      if (err) { err.style.display = 'block'; err.textContent = 'فشل شحن الرصيد: ' + e.message; }
+    } finally {
+      goBtn.disabled = false;
+      goBtn.textContent = 'شحن الآن';
+    }
+  };
 }

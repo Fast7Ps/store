@@ -22,6 +22,14 @@ function loadProducts() {
     const stored = localStorage.getItem('mycart_admin_products');
     if (stored !== null) { return JSON.parse(stored); }
   } catch (e) { }
+  
+  // إذا كان اتصال Supabase مهيأً، فلا نريد إرجاع المنتجات التجريبية الافتراضية
+  const cfg = window.SUPABASE_CONFIG || {};
+  const isSbConfigured = !!(cfg.url && cfg.anonKey && cfg.writeToken && !cfg.url.includes('YOUR-PROJECT-REF'));
+  if (isSbConfigured) {
+    return [];
+  }
+  
   try { localStorage.setItem('mycart_admin_products', JSON.stringify(DEFAULT_PRODUCTS)); } catch (e) { }
   return DEFAULT_PRODUCTS;
 }

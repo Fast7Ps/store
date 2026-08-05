@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --accent: #ef4444;
   --accent-hover: #dc2626;
   --whatsapp: #25D366;
@@ -1390,7 +1390,7 @@ body {
   white-space: nowrap
 }
 
-.product-card .wishlist-btn {
+.wishlist-btn {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -1412,11 +1412,11 @@ body {
   line-height: 1;
 }
 
-.product-card .wishlist-btn.active {
+.wishlist-btn.active {
   color: #ef4444;
 }
 
-.product-card .wishlist-btn:hover {
+.wishlist-btn:hover {
   transform: scale(1.15);
 }
 
@@ -3692,13 +3692,16 @@ body.img-hover-zoom .product-card:hover .product-card-dots img {
 }
 
 .qty-btn-cart {
-  color: var(--accent, #ef4444);
+  background: var(--accent, #ef4444);
+  color: #fff;
   border-color: var(--accent, #ef4444);
 }
 
 .qty-btn-cart:hover {
   background: var(--accent, #ef4444);
   color: #fff;
+  transform: scale(1.08);
+  opacity: 0.9;
 }
 
 .sheet-footer {

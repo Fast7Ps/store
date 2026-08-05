@@ -1,4 +1,4 @@
-﻿let WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || '';
+let WHOLESALE_CODE = localStorage.getItem('mycart_wholesale_code') || adminSettings.wholesaleCode || '';
 
 // The per-store admin code is stored ONLY at the company server and verified
 // via verifyAdminCode below. No local/legacy code exists anymore.
@@ -416,8 +416,13 @@ function saveWishlist() { try { localStorage.setItem('mycart_wishlist', JSON.str
 function updateWishlistBadge() {
   const badge = document.getElementById('wishlistBadge');
   if (!badge) return;
-  if (wishlist.length > 0) { badge.style.display = 'flex'; badge.textContent = wishlist.length; }
-  else badge.style.display = 'none';
+  const validCount = wishlist.filter(id => products.some(p => p.id === id)).length;
+  if (validCount > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = validCount;
+  } else {
+    badge.style.display = 'none';
+  }
 }
 
 function toggleWishlist(id) {
@@ -2089,6 +2094,7 @@ function renderProducts(list) {
         const o = getProductOffer(p);
         return `<div class="mini-card" data-id="${p.id}" onclick="openDetail(${p.id})">
           <span class="offers-badge"><i class="fa-solid fa-gift"></i> ${o?o.badge||o.name:''}</span>
+          <button class="wishlist-btn ${wishlist.includes(p.id) ? 'active' : ''}" data-id="${p.id}" onclick="event.stopPropagation();toggleWishlist(${p.id})"><i class="fa-solid fa-heart"></i></button>
           <img src="${getProductImages(p)[0]}" alt="${p.name}" loading="lazy">
           ${_cardMiniNavHtml(p)}
           <div class="info"><h4>${p.name}</h4><div class="p">${(()=>{const _op=calcOfferPrice(p);if(_op!==null)return `${CURRENCY}${_op} <span style="text-decoration:line-through;opacity:.7;font-size:.7rem">${CURRENCY}${wPrice(p)}</span>`;const _bp=wPrice(p);return `${CURRENCY}${_bp}`;})()}${wBadge()}</div></div>
@@ -2117,6 +2123,7 @@ function renderProducts(list) {
         const oldPriceHtml = hasDiscount ? '<span style="font-size:.72rem;text-decoration:line-through;color:var(--text-muted);opacity:.65">' + CURRENCY + (p.oldPrice || 0).toFixed(2) + '</span>' : '';
         return '<div class="mini-card" data-id="' + p.id + '" onclick="openDetail(' + p.id + ')">' +
           '<span class="feat-badge"><i class="fa-solid fa-star"></i> مميز</span>' +
+          '<button class="wishlist-btn ' + (wishlist.includes(p.id) ? 'active' : '') + '" data-id="' + p.id + '" onclick="event.stopPropagation();toggleWishlist(' + p.id + ')"><i class="fa-solid fa-heart"></i></button>' +
           '<div class="feat-img"><img src="' + getProductImages(p)[0] + '" alt="' + p.name + '" loading="lazy"></div>' +
           _cardMiniNavHtml(p) +
           '<div class="feat-body">' +
@@ -2152,6 +2159,7 @@ function renderProducts(list) {
           const oldHtml = hasDiscount ? '<span style="font-size:.7rem;text-decoration:line-through;color:var(--text-muted)">' + CURRENCY + (p.oldPrice || 0).toFixed(2) + '</span>' : '';
           return '<div class="mini-card na-card" data-id="' + p.id + '" onclick="openDetail(' + p.id + ')">' +
             '<span class="na-badge">🔖 جديد</span>' +
+            '<button class="wishlist-btn ' + (wishlist.includes(p.id) ? 'active' : '') + '" data-id="' + p.id + '" onclick="event.stopPropagation();toggleWishlist(' + p.id + ')"><i class="fa-solid fa-heart"></i></button>' +
             '<div class="feat-img"><img src="' + getProductImages(p)[0] + '" alt="' + p.name + '" loading="lazy"></div>' +
             '<div class="feat-body">' +
             '<h4>' + p.name + '</h4>' +
@@ -2185,6 +2193,7 @@ function renderProducts(list) {
           const discPct = Math.round((1 - p.price / p.oldPrice) * 100);
           return '<div class="mini-card hp-card" data-id="' + p.id + '" onclick="openDetail(' + p.id + ')">' +
             '<span class="hp-badge">-' + discPct + '%</span>' +
+            '<button class="wishlist-btn ' + (wishlist.includes(p.id) ? 'active' : '') + '" data-id="' + p.id + '" onclick="event.stopPropagation();toggleWishlist(' + p.id + ')"><i class="fa-solid fa-heart"></i></button>' +
             '<div class="feat-img"><img src="' + getProductImages(p)[0] + '" alt="' + p.name + '" loading="lazy"></div>' +
             '<div class="feat-body">' +
             '<h4>' + p.name + '</h4>' +
@@ -2217,6 +2226,7 @@ function renderProducts(list) {
           const oldPriceHtml = hasDiscount ? '<span style="font-size:.7rem;text-decoration:line-through;color:var(--text-muted)">' + CURRENCY + (p.oldPrice || 0).toFixed(2) + '</span>' : '';
           return '<div class="mini-card" data-id="' + p.id + '" onclick="openDetail(' + p.id + ')">' +
             '<span class="feat-badge"><i class="fa-solid fa-fire"></i> ' + (p.soldCount || 0) + '</span>' +
+            '<button class="wishlist-btn ' + (wishlist.includes(p.id) ? 'active' : '') + '" data-id="' + p.id + '" onclick="event.stopPropagation();toggleWishlist(' + p.id + ')"><i class="fa-solid fa-heart"></i></button>' +
             '<div class="feat-img"><img src="' + getProductImages(p)[0] + '" alt="' + p.name + '" loading="lazy"></div>' +
             _cardMiniNavHtml(p) +
             '<div class="feat-body">' +
@@ -2877,7 +2887,7 @@ function renderWishlist() {
         <div class="cart-item-price">${CURRENCY}${wPrice(p)}${wBadge()}</div>
       </div>
       <div class="wishlist-actions">
-        <button class="qty-btn qty-btn-cart" onclick="event.stopPropagation();quickAdd(${p.id})"><i class="fa-solid fa-cart-plus"></i></button>
+        <button class="qty-btn qty-btn-cart" onclick="event.stopPropagation();quickAdd(${p.id})"><i class="fa-solid ${((p.options && p.options.length) || (p.variants && p.variants.length)) ? 'fa-plus' : 'fa-cart-shopping'}"></i></button>
         <button class="qty-btn" style="color:#ef4444" onclick="event.stopPropagation();toggleWishlist(${p.id});renderWishlist()"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>
@@ -3123,11 +3133,17 @@ function openDetail(id, fromRoute) {
     }
   }
   const quickWaBtn = document.getElementById('quickWaBtn');
+  const quickWaOrSeparator = document.getElementById('quickWaOrSeparator');
+  const quickWaError = document.getElementById('quickWaError');
   if (quickWaBtn) {
-    if (marketingData.waCheckout?.show) {
+    if (marketingData.waCheckout?.show !== false) {
       quickWaBtn.style.display = 'flex';
+      if (quickWaOrSeparator) quickWaOrSeparator.style.display = 'block';
+      if (quickWaError) quickWaError.style.display = 'none'; // مخفي عند التحميل
     } else {
       quickWaBtn.style.display = 'none';
+      if (quickWaOrSeparator) quickWaOrSeparator.style.display = 'none';
+      if (quickWaError) quickWaError.style.display = 'none';
     }
   }
   // Volume Discount
@@ -3496,7 +3512,20 @@ function updateDetailThumbs(p) {
   }
 }
 
-function changeDetailQty(delta) { detailQty = Math.max(1, detailQty + delta); document.getElementById('detailQty').textContent = detailQty; }
+function changeDetailQty(delta) {
+  const nextQty = detailQty + delta;
+  if (nextQty < 1) {
+    playSound('error');
+    return;
+  }
+  detailQty = nextQty;
+  document.getElementById('detailQty').textContent = detailQty;
+  if (delta > 0) {
+    playSound('add');
+  } else if (delta < 0) {
+    playSound('remove');
+  }
+}
 
 function switchDetailImg(idx, el) {
   stopDetailSlideshow();
@@ -7219,7 +7248,17 @@ function quickWaOrder() {
   const marketingData = JSON.parse(localStorage.getItem('mycart_marketing')) || {};
   const waNumber = marketingData.social?.whatsapp;
   if (!waNumber) {
-    showToast('رقم الواتساب غير مضبوط بلوحة التحكم!', 'error');
+    playSound('error');
+    const quickWaError = document.getElementById('quickWaError');
+    if (quickWaError) {
+      quickWaError.textContent = 'عذراً، خدمة الطلب عبر واتساب غير متوفرة حالياً. يرجى الطلب عبر إضافة المنتج إلى السلة.';
+      quickWaError.style.display = 'block';
+      quickWaError.classList.remove('quick-wa-error-shake');
+      void quickWaError.offsetWidth; // Trigger reflow
+      quickWaError.classList.add('quick-wa-error-shake');
+    } else {
+      showToast('عذراً، خدمة الطلب عبر واتساب غير متوفرة حالياً. يرجى الطلب عبر إضافة المنتج إلى السلة.', 'error');
+    }
     return;
   }
   
@@ -7971,6 +8010,12 @@ function refreshFromCloud() {
   window.__supabaseRefreshed = true;
   try {
     products = loadProducts();
+    if (typeof products !== 'undefined' && Array.isArray(products)) {
+      const productIds = new Set(products.map(p => p.id));
+      wishlist = wishlist.filter(id => productIds.has(id));
+      saveWishlist();
+      updateWishlistBadge();
+    }
     adminSettings = loadAdminSettings();
     CURRENCY = adminSettings.currency || '₪';
     if (typeof loadAppearance === 'function') loadAppearance();
@@ -8033,6 +8078,7 @@ function renderFlashProducts(items, container) {
       '<div class="flash-card-img" style="position:relative">' +
         '<img src="' + imgSrc + '" alt="' + (p.name || '') + '" loading="lazy">' +
         '<span class="flash-badge">-' + discount + '%</span>' +
+        '<button class="wishlist-btn ' + (wishlist.includes(p.id) ? 'active' : '') + '" data-id="' + p.id + '" onclick="event.stopPropagation();toggleWishlist(' + p.id + ')"><i class="fa-solid fa-heart"></i></button>' +
         '<div class="flash-stock-bar"><div class="flash-stock-fill" style="width:' + stockPct + '%"></div></div>' +
         (_isOut ? '<div class="out-of-stock-overlay"><span>نفذ<br><small>انتهت الكمية</small></span></div>' : '') +
       '</div>' +
