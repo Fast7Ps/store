@@ -12,23 +12,24 @@
     'mycart_store_suspended'
   ];
 
-  // Extract storeId from config or URL pathname
-  let storeId = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.storeId) || 'default';
-  if (storeId === 'default') {
-    const pathParts = window.location.pathname.split('/').filter(Boolean);
-    if (pathParts.length > 0) {
-      if (pathParts[0] === 'stores' && pathParts[1]) {
-        storeId = pathParts[1];
-      } else if (pathParts[0] !== 'stores') {
-        storeId = pathParts[0];
-      }
+  // Extract storeId for LocalStorage namespacing (isolates localhost/GitHub Pages keys)
+  let localStoreId = 'default';
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts.length > 0) {
+    if (pathParts[0] === 'stores' && pathParts[1]) {
+      localStoreId = pathParts[1];
+    } else if (pathParts[0] !== 'stores') {
+      localStoreId = pathParts[0];
     }
   }
+
+  // Always use 'default' for Supabase database operations on isolated databases
+  let storeId = 'default';
 
   // Helper to namespace localstorage keys to avoid collisions on localhost
   function getNamespacedKey(key) {
     if (key.startsWith('mycart_') && !['mycart_cid', 'mycart_dark_mode'].includes(key)) {
-      return `${key}_${storeId}`;
+      return `${key}_${localStoreId}`;
     }
     return key;
   }
