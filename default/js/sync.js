@@ -12,14 +12,16 @@
     'mycart_store_suspended'
   ];
 
-  // Extract storeId from the URL pathname (e.g., /stores/watches/ -> watches, or /demo/ -> demo)
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-  let storeId = 'default';
-  if (pathParts.length > 0) {
-    if (pathParts[0] === 'stores' && pathParts[1]) {
-      storeId = pathParts[1];
-    } else if (pathParts[0] !== 'stores') {
-      storeId = pathParts[0];
+  // Extract storeId from config or URL pathname
+  let storeId = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.storeId) || 'default';
+  if (storeId === 'default') {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    if (pathParts.length > 0) {
+      if (pathParts[0] === 'stores' && pathParts[1]) {
+        storeId = pathParts[1];
+      } else if (pathParts[0] !== 'stores') {
+        storeId = pathParts[0];
+      }
     }
   }
 
