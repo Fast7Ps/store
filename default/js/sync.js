@@ -12,12 +12,15 @@
     'mycart_store_suspended'
   ];
 
-  // Extract storeId from the URL pathname (e.g., /stores/watches/ -> watches)
-  const pathParts = window.location.pathname.split('/');
-  const storesIndex = pathParts.indexOf('stores');
+  // Extract storeId from the URL pathname (e.g., /stores/watches/ -> watches, or /demo/ -> demo)
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
   let storeId = 'default';
-  if (storesIndex !== -1 && pathParts[storesIndex + 1]) {
-    storeId = pathParts[storesIndex + 1];
+  if (pathParts.length > 0) {
+    if (pathParts[0] === 'stores' && pathParts[1]) {
+      storeId = pathParts[1];
+    } else if (pathParts[0] !== 'stores') {
+      storeId = pathParts[0];
+    }
   }
 
   // Helper to namespace localstorage keys to avoid collisions on localhost
