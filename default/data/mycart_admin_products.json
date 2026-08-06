@@ -1,0 +1,639 @@
+[
+  {
+    "sku": "APP-012",
+    "stock": 35,
+    "id": 4012,
+    "name": "طباخ بطيء Crock-Pot 7 كوارت",
+    "price": 45,
+    "wholesalePrice": 0,
+    "oldPrice": 65,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/71pKe7%2B88ZL._AC_SL1000_.jpg",
+      "https://i.ibb.co/JjPLTtHG/39dae6442d31.jpg",
+      "https://i.ibb.co/Zz5JP07H/51ce636154de.jpg",
+      "https://i.ibb.co/tMDVH6zr/2d20254dd2ff.jpg",
+      "https://i.ibb.co/N2Jyy13K/79669554f63d.jpg",
+      "https://i.ibb.co/9DMcDKD/de65a60a8956.jpg"
+    ],
+    "optionsRequired": false,
+    "brand": "",
+    "note": "",
+    "description": "طباخ بطيء عائلي بسعة 7 كوارت تكفي 8 أشخاص، مع وعاء فخاري قابل للإزالة وسهل التنظيف.",
+    "featured": false,
+    "badge": "",
+    "countdown": {
+      "show": true,
+      "duration": 1400
+    },
+    "liveViewers": {
+      "show": false
+    },
+    "features": [
+      "سعة 7 كوارت عائلية",
+      "وعاء فخاري قابل للإزالة",
+      "إعداد تدفئة تلقائي",
+      "آمن في غسالة الصحون"
+    ],
+    "specs": [
+      [
+        "السعة",
+        "7 كوارت"
+      ],
+      [
+        "المناسبة",
+        "8+ أشخاص"
+      ]
+    ],
+    "options": [
+      {
+        "name": "الاحجام",
+        "type": "image",
+        "values": [
+          {
+            "value": "كبير",
+            "price": 5,
+            "wholesalePrice": 0,
+            "stock": 0,
+            "extra": "https://m.media-amazon.com/images/I/71pKe7%2B88ZL._AC_SL1000_.jpg"
+          },
+          {
+            "value": "صغير",
+            "price": 5,
+            "wholesalePrice": 0,
+            "stock": 5,
+            "extra": "https://i.ibb.co/Fk6Tzsf0/7f8d6da912e0.png"
+          }
+        ]
+      },
+      {
+        "name": "مقاس",
+        "type": "text",
+        "values": [
+          {
+            "value": "لارج",
+            "price": 50,
+            "wholesalePrice": 0,
+            "stock": 90,
+            "extra": ""
+          },
+          {
+            "value": "ميديم",
+            "price": 50,
+            "wholesalePrice": 0,
+            "stock": 90,
+            "extra": ""
+          }
+        ]
+      }
+    ],
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4008,
+      4009
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-011",
+    "stock": 30,
+    "id": 4011,
+    "name": "ماكينة آيس كريم Ninja CREAMi",
+    "price": 209,
+    "oldPrice": 278,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/7106NYA4Z2L._AC_SL1000_.jpg"
+    ],
+    "brand": "Ninja",
+    "description": "ماكينة آيس كريم متعددة الوظائف تحوّل قواعدك المجمدة إلى آيس كريم وجيلاتي وسوربيه بضغطة زر.",
+    "featured": true,
+    "badge": "بريميوم",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "7 وظائف للتحضير",
+      "آيس كريم وجيلاتي وسوربيه",
+      "تحضير سريع بضغطة زر",
+      "عبوات قابلة لإعادة الاستخدام"
+    ],
+    "specs": [
+      [
+        "الوظائف",
+        "7 وظائف"
+      ],
+      [
+        "السعة",
+        "بال pint"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4009,
+      4004
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-010",
+    "stock": 60,
+    "id": 4010,
+    "name": "خلاط يدوي غامر Turelar 1100 واط",
+    "price": 36,
+    "oldPrice": 53,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/61XRVcpkxxL._AC_SL1000_.jpg"
+    ],
+    "brand": "Turelar",
+    "description": "خلاط يدوي غامر قوي 1100 واط بسرعة متغيرة، مع ملحقات للخفق ومعالجة الطعام.",
+    "featured": false,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": false
+    },
+    "features": [
+      "محرك 1100 واط",
+      "سرعة متغيرة بالزناد",
+      "5 ملحقات متعددة",
+      "شفرات ستانلس ستيل"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "1100 واط"
+      ],
+      [
+        "الملحقات",
+        "5 قطع"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4003,
+      4005
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-009",
+    "stock": 55,
+    "id": 4009,
+    "name": "قلاية هوائية Cosori TurboBlaze 6 كوارت",
+    "price": 120,
+    "oldPrice": 163,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/81R9sA3IyBL._AC_SL1000_.jpg"
+    ],
+    "brand": "Cosori",
+    "description": "قلاية هوائية ذكية بسعة 6 كوارت و9 وظائف، تطهو طعاماً صحياً مقرمشاً بدون زيت تقريباً.",
+    "featured": true,
+    "badge": "الأكثر طلباً",
+    "countdown": {
+      "show": true,
+      "duration": 3600
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "9 وظائف طهي",
+      "سعة 6 كوارت عائلية",
+      "طلاء خالٍ من PFAS",
+      "حرارة حتى 450°F"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "1725 واط"
+      ],
+      [
+        "السعة",
+        "6 كوارت"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4011,
+      4012
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-008",
+    "stock": 50,
+    "id": 4008,
+    "name": "طباخ أرز AROMA رقمي 8 أكواب",
+    "price": 37,
+    "oldPrice": 55,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/71-U1rX30iL._AC_SL1000_.jpg"
+    ],
+    "brand": "AROMA",
+    "description": "طباخ أرز رقمي متعدد الاستخدامات للأرز والحبوب والطهي على البخار، بتصميم خارجي فولاذي.",
+    "featured": true,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "طهي 8 أكواب أرز",
+      "وظيفة الطهي على البخار",
+      "لوحة رقمية سهلة",
+      "فولاذ مقاوم للصدأ"
+    ],
+    "specs": [
+      [
+        "السعة",
+        "8 أكواب مطبوخ"
+      ],
+      [
+        "الوظائف",
+        "أرز وبخار وحبوب"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4007,
+      4012
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-007",
+    "stock": 45,
+    "id": 4007,
+    "name": "ماكينة قهوة BLACK+DECKER 12 كوب",
+    "price": 32,
+    "oldPrice": 48,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/61Rdl5C2AHL._AC_SL1000_.jpg"
+    ],
+    "brand": "BLACK+DECKER",
+    "description": "ماكينة قهوة بالتنقيط لـ12 كوب مع تقنية تخمير دوامي، مثالية للعائلة والمكتب.",
+    "featured": false,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": false
+    },
+    "features": [
+      "تخمير حتى 12 كوب",
+      "تقنية Vortex للتخمير",
+      "نافذة لمستوى الماء",
+      "إبقاء القهوة ساخنة"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "كهربائي"
+      ],
+      [
+        "السعة",
+        "12 كوب"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4002,
+      4008
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-006",
+    "stock": 40,
+    "id": 4006,
+    "name": "غلاية كهربائية Cosori 1.7 لتر",
+    "price": 28,
+    "oldPrice": 43,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/81bgn8np84L._AC_SL1000_.jpg"
+    ],
+    "brand": "Cosori",
+    "description": "غلاية كهربائية أنيقة بدون تلامس البلاستيك مع الماء، مع إيقاف تلقائي وحماية من الغليان الجاف.",
+    "featured": true,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "سعة 1.7 لتر",
+      "بدون تلامس بلاستيك مع الماء",
+      "إيقاف تلقائي وحماية الغليان الجاف",
+      "تصميم أنيق"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "1500 واط"
+      ],
+      [
+        "السعة",
+        "1.7 لتر"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4001,
+      4002
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-005",
+    "stock": 35,
+    "id": 4005,
+    "name": "خلاط Nutribullet شخصي 600 واط",
+    "price": 50,
+    "oldPrice": 72,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/61Am3i23tGL._AC_SL1000_.jpg"
+    ],
+    "brand": "Nutribullet",
+    "description": "خلاط شخصي قوي لتحضير العصائر والسموذي بسرعة، بتصميم عملي وسهل الاستخدام والتنظيف.",
+    "featured": false,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": false
+    },
+    "features": [
+      "محرك 600 واط",
+      "شفرات استخلاص قوية",
+      "كوب تنقل عملي",
+      "سهل التنظيف"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "600 واط"
+      ],
+      [
+        "السعة",
+        "24 أونصة"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4003,
+      4010
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-004",
+    "stock": 30,
+    "id": 4004,
+    "name": "جهاز سلق البيض Dash Rapid",
+    "price": 20,
+    "oldPrice": 33,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/51lILkbQ4zL._AC_SL1000_.jpg"
+    ],
+    "brand": "Dash",
+    "description": "جهاز عملي لسلق حتى 7 بيضات بسرعة، مع إيقاف تلقائي وسهل الاستخدام والتنظيف.",
+    "featured": false,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": false
+    },
+    "features": [
+      "يسلق حتى 7 بيضات",
+      "إيقاف تلقائي",
+      "سريع وسهل التنظيف",
+      "تصميم مدمج"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "كهربائي"
+      ],
+      [
+        "السعة",
+        "7 بيضات"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4001,
+      4011
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-003",
+    "stock": 60,
+    "id": 4003,
+    "name": "خلاط Ninja Fit شخصي 700 واط",
+    "price": 55,
+    "oldPrice": 78,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/710oNE8RCjL._AC_SL1000_.jpg"
+    ],
+    "brand": "Ninja",
+    "description": "خلاط شخصي قوي 700 واط مع كوبين للتنقل، يطحن الفواكه والثلج لسموذي مثالي خلال ثوانٍ.",
+    "featured": true,
+    "badge": "",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "محرك 700 واط",
+      "كوبان 16 أونصة للتنقل",
+      "شفرات قوية للثلج",
+      "أجزاء آمنة في غسالة الصحون"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "700 واط"
+      ],
+      [
+        "السعة",
+        "2 × 16 أونصة"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4005,
+      4010
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-002",
+    "stock": 55,
+    "id": 4002,
+    "name": "ماكينة قهوة Keurig K-Express",
+    "price": 70,
+    "oldPrice": 98,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/71xuVr0CPbL._AC_SL1000_.jpg"
+    ],
+    "brand": "Keurig",
+    "description": "ماكينة قهوة فردية متوافقة مع كبسولات K-Cup، تحضّر قهوتك المفضلة بضغطة زر وبأحجام متعددة.",
+    "featured": true,
+    "badge": "جديد",
+    "countdown": {
+      "show": false,
+      "duration": 0
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "3 أحجام للتخمير",
+      "زر قهوة قوية",
+      "خزان مياه 42 أونصة",
+      "توافق مع كبسولات K-Cup"
+    ],
+    "specs": [
+      [
+        "النوع",
+        "ماكينة كبسولات"
+      ],
+      [
+        "الخزان",
+        "42 أونصة"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4007,
+      4008
+    ],
+    "fbtShow": true
+  },
+  {
+    "sku": "APP-001",
+    "stock": 50,
+    "id": 4001,
+    "name": "محمصة bella بشريحتين",
+    "price": 25,
+    "oldPrice": 39,
+    "categories": [
+      "أدوات منزلية",
+      "مطبخ"
+    ],
+    "images": [
+      "https://m.media-amazon.com/images/I/71zZ0tSkfHL._AC_SL1000_.jpg"
+    ],
+    "brand": "bella",
+    "description": "محمصة خبز مدمجة بفتحة طويلة تتسع لشريحتين، مع 6 درجات تحميص ووظائف إعادة وإلغاء.",
+    "featured": true,
+    "badge": "الأكثر مبيعاً",
+    "countdown": {
+      "show": true,
+      "duration": 3600
+    },
+    "liveViewers": {
+      "show": true
+    },
+    "features": [
+      "فتحة طويلة لشريحتين",
+      "6 درجات تحميص",
+      "إلغاء وإعادة التحميص",
+      "تصميم مدمج"
+    ],
+    "specs": [
+      [
+        "القدرة",
+        "900 واط"
+      ],
+      [
+        "عدد الفتحات",
+        "2"
+      ]
+    ],
+    "type": "normal",
+    "createdAt": "٢٩‏/٧‏/٢٠٢٦",
+    "fbtProductIds": [
+      4002,
+      4006
+    ],
+    "fbtShow": true
+  }
+]

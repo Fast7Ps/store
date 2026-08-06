@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>لوحة التحكم - متجري</title>
+<link rel="stylesheet" href="fonts/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <i class="fa-solid fa-shield-halved" style="font-size:2.5rem;color:var(--accent);margin-bottom:12px"></i>
+    <h2>لوحة التحكم</h2>
+    <p>ادخل كود admin للدخول</p>
+    <input type="password" id="adminPass" placeholder="كود ADMIN" maxlength="20">
+    <button onclick="adminLogin()">دخول</button>
+    <div class="error-msg" id="loginError">⚠️ كود غير صحيح</div>
+    <a href="index.html" style="display:inline-block;margin-top:12px;color:var(--text-muted);font-size:.8rem">← العودة للمتجر</a>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <i class="fa-solid fa-store"></i>
+      <span>لوحة التحكم</span>
+    </div>
+    <nav>
+      <button class="active" data-tab="dashboard" onclick="location.hash='#dashboard'"><i class="fa-solid fa-chart-simple"></i> الإحصائيات</button>
+      <button data-tab="orders" onclick="location.hash='#orders'"><i class="fa-solid fa-receipt"></i> الطلبات <span id="orderBadge" style="display:none">0</span></button>
+      <button data-tab="products" onclick="location.hash='#products'"><i class="fa-solid fa-box"></i> المنتجات</button>
+      <button data-tab="categories" onclick="location.hash='#categories'"><i class="fa-solid fa-tags"></i> التصنيفات</button>
+      <button data-tab="addProduct" onclick="location.hash='#addProduct'"><i class="fa-solid fa-plus-circle"></i> إضافة منتج</button>
+      <button data-tab="settings" onclick="location.hash='#settings'"><i class="fa-solid fa-gear"></i> الإعدادات</button>
+      <button data-tab="banners" onclick="location.hash='#banners'"><i class="fa-solid fa-images"></i> البانرات</button>
+      <button data-tab="coupons" onclick="location.hash='#coupons'"><i class="fa-solid fa-ticket" style="color:#f59e0b"></i> أكواد الخصم <span id="couponBadge" style="display:none;background:rgba(245,158,11,.2);color:#f59e0b;font-size:.65rem;padding:1px 8px;border-radius:999px;margin-right:auto;font-weight:800">0</span></button>
+      <button data-tab="appearance" onclick="location.hash='#appearance'"><i class="fa-solid fa-palette"></i> المظهر والتخطيط</button>
+      <button data-tab="spinwheel" onclick="location.hash='#spinwheel'"><i class="fa-solid fa-circle-notch" style="color:#f59e0b"></i> عجلة الحظ</button>
+      <button data-tab="subscription" onclick="location.hash='#subscription'"><i class="fa-solid fa-crown" style="color:#f59e0b"></i> الاشتراك <span style="font-size:.65rem;background:rgba(245,158,11,.2);color:#f59e0b;padding:1px 8px;border-radius:999px;margin-right:auto;font-weight:800">ترقية</span></button>
+      <div style="position: relative;">
+        <button data-tab="marketing" onclick="toggleMktSubMenu(event); if(location.hash.indexOf('marketing')===-1) location.hash='#marketing/seo'"><i class="fa-solid fa-bullhorn"></i> التسويق <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; margin-right:auto; transition: transform 0.2s;" id="mktChevron"></i></button>
+        <!-- Marketing Submenu Links -->
+        <div id="mktSubMenu" style="display:none; flex-direction:column; background:rgba(0,0,0,0.15); padding:4px 0; border-radius:8px; margin:4px 8px; gap:2px;">
+          <button class="submenu-btn" onclick="location.hash='#marketing/seo'" style="font-size:0.78rem; padding:8px 12px; font-weight:500;"><i class="fa-solid fa-magnifying-glass" style="font-size:0.7rem"></i> تحسين محركات البحث</button>
+          <button class="submenu-btn" onclick="location.hash='#marketing/social'" style="font-size:0.78rem; padding:8px 12px; font-weight:500;"><i class="fa-solid fa-share-nodes" style="font-size:0.7rem"></i> التواصل والتتبع</button>
+          <button class="submenu-btn" onclick="location.hash='#marketing/offers'" style="font-size:0.78rem; padding:8px 12px; font-weight:500;"><i class="fa-solid fa-tags" style="font-size:0.7rem"></i> العروض والكميات</button>
+          <button class="submenu-btn" onclick="location.hash='#marketing/widgets'" style="font-size:0.78rem; padding:8px 12px; font-weight:500;"><i class="fa-solid fa-bullhorn" style="font-size:0.7rem"></i> تنبيهات وإعلانات</button>
+          <button class="submenu-btn" onclick="location.hash='#marketing/reviews'" style="font-size:0.78rem; padding:8px 12px; font-weight:500;"><i class="fa-solid fa-star" style="font-size:0.7rem"></i> التقييمات</button>
+          <button class="submenu-btn" onclick="location.hash='#marketing/popup'" style="font-size:0.78rem; padding:8px 12px; font-weight:500;"><i class="fa-solid fa-window-restore" style="font-size:0.7rem"></i> النافذة الترويجية</button>
+        </div>
+      </div>
+      <button onclick="adminLogout()" style="margin-top:auto;color:#ef4444"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+    </nav>
+  </aside>
+
+  <main id="mainArea">
+    <div class="topbar">
+      <button id="mobileMenuBtn" onclick="toggleMobileMenu()"><i class="fa-solid fa-bars"></i></button>
+      <h2 id="pageTitle">الإحصائيات</h2>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="notifBtn" onclick="showNotifPanel()" style="position:relative;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text);padding:4px 8px"><i class="fa-solid fa-bell"></i><span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;font-size:.6rem;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;font-weight:800">0</span></button>
+        <span id="adminFeeBadge" onclick="location.hash='#subscription'" style="display:none;background:rgba(245,158,11,.15);color:#f59e0b;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:pointer"></span>
+        <button onclick="topbarLogout()" title="تسجيل الخروج" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#ef4444;padding:4px 8px;display:flex;align-items:center;gap:4px;font-family:inherit;font-weight:700"><i class="fa-solid fa-right-from-bracket"></i><span style="font-size:.75rem">خروج</span></button>
+        <a href="index.html" target="_blank" class="view-store-btn"><i class="fa-solid fa-eye"></i> عرض المتجر</a>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><i class="fa-solid fa-box"></i><div><span id="statProducts">0</span><p>المنتجات</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-receipt"></i><div><span id="statOrders">0</span><p>الطلبات</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-money-bill"></i><div><span id="statRevenue">₪0</span><p>الإيرادات</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-users"></i><div><span id="statCustomers">0</span><p>العملاء</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-users-gear" style="color:#d97706"></i><div><span id="statWholesaleCustomers">0</span><p>عملاء الجملة</p></div></div>
+      </div>
+      <div style="margin-top:20px">
+        <h3 style="margin-bottom:10px">المبيعات اليومية (آخر 7 أيام)</h3>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;overflow-x:auto">
+          <canvas id="salesChart" height="200" style="width:100%;max-height:200px"></canvas>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px">
+        <div>
+          <h3 style="margin-bottom:10px">🔥 المنتجات الأكثر مبيعاً (أفضل 10)</h3>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px" id="topProductsList"></div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:10px">📍 المدن الأكثر طلباً (أفضل 5)</h3>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px" id="topCitiesList"></div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:10px">📅 الأيام الأكثر نشاطاً</h3>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px" id="topActiveDaysList"></div>
+        </div>
+      </div>
+      <div style="margin-top:20px">
+        <h3 style="margin-bottom:10px">آخر الطلبات</h3>
+        <div id="recentOrders"></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="tab-content" id="tab-orders">
+      <div class="section-header"><h3>جميع الطلبات</h3></div>
+      <div id="ordersList"></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="tab-content" id="tab-products">
+      <div class="section-header"><h3>إدارة المنتجات</h3></div>
+      <div id="productsList"></div>
+    </div>
+
+    <!-- ADD PRODUCT -->
+    <div class="tab-content" id="tab-addProduct">
+      <div class="section-header"><h3>إضافة منتج جديد</h3></div>
+      <form id="productForm" onsubmit="saveProduct(event)">
+        <input type="hidden" id="editId" value="">
+        <div class="form-grid">
+          <div class="form-group"><label>اسم المنتج *</label><input type="text" id="pName" required></div>
+          <div class="form-group"><label>السعر *</label><input type="number" id="pPrice" step="0.01" required></div>
+          <div class="form-group"><label>السعر القديم</label><input type="number" id="pOldPrice" step="0.01"></div>
+          <div class="form-group"><label>التصنيفات</label>
+            <input type="text" id="pCatSearch" placeholder="بحث عن تصنيف..." oninput="filterCatCheckboxes()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.8rem;margin-bottom:6px;box-sizing:border-box">
+            <div id="pCatList"></div>
+          </div>
+          <div class="form-group"><label>صور المنتج</label>
+            <button type="button" class="upload-btn" onclick="uploadProductImages()" style="margin-bottom:6px"><i class="fa-solid fa-upload"></i> اختر صور (واحدة أو أكثر)</button>
+            <div style="display:flex;gap:6px;margin-bottom:6px">
+              <input type="text" id="pImageUrl" placeholder="أو أدخل رابط الصورة" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.8rem">
+              <button type="button" class="upload-btn" onclick="addImageByUrl()" style="padding:8px 14px;white-space:nowrap"><i class="fa-solid fa-link"></i> إضافة</button>
+            </div>
+            <div id="pImageList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+          <div class="form-group"><label>فيديو المنتج (YouTube, TikTok, Instagram, فيسبوك)</label>
+            <div style="display:flex;gap:6px;margin-bottom:6px">
+              <input type="text" id="pVideoUrl" placeholder="ألصق رابط الفيديو..." style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.8rem">
+              <button type="button" class="upload-btn" onclick="addVideoUrl()" style="padding:8px 14px;white-space:nowrap"><i class="fa-solid fa-plus"></i> إضافة</button>
+            </div>
+            <div id="pVideoList" style="display:flex;flex-direction:column;gap:4px"></div>
+          </div>
+          <div class="form-group"><label>العلامة التجارية</label>
+            <input type="text" id="pBrandSearch" placeholder="بحث عن علامة تجارية..." oninput="filterBrandOptions()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.8rem;margin-bottom:6px;box-sizing:border-box">
+            <div id="pBrandList" style="max-height:130px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:4px"></div>
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pFeatured" style="width:16px;height:16px"> منتج مميز</label>
+          </div>
+          <div class="form-group"><label>الشارة الترويجية (مثل: الأكثر مبيعاً، جديد...)</label><input type="text" id="pBadge" placeholder="اكتب الشارة هنا..."></div>
+        </div>
+        <div class="form-group"><label>ملاحظة خاصة بالمنتج (تظهر بشكل بارز في صفحة المنتج)</label><input type="text" id="pNote" placeholder="مثال: التوصيل مجاني لفترة محدودة، أو ضمان سنتين"></div>
+        <div class="form-group"><label>الميزات (واحدة في كل سطر)</label><textarea id="pFeatures" rows="3"></textarea></div>
+        <div class="form-group"><label>المواصفات (الاسم : القيمة, كل مواصفة في سطر)</label><textarea id="pSpecs" rows="3" placeholder="المعالج : A18&#10;الرام : 8GB"></textarea></div>
+        <div class="form-group">
+          <label>الخيارات (لون، مقاس، ...)</label>
+          <div id="pOptions"></div>
+          <button type="button" class="btn-secondary" onclick="addOption()" style="padding:6px 12px;font-size:.8rem;margin-top:4px"><i class="fa-solid fa-plus"></i> إضافة خيار جديد</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button type="submit" class="btn-primary" id="submitBtn">حفظ المنتج</button>
+          <button type="button" class="btn-secondary" onclick="resetForm()">إعادة تعيين</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="tab-content" id="tab-categories">
+      <div class="section-header"><h3>إدارة التصنيفات</h3></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px">
+        <div class="form-group"><label>اسم التصنيف</label><input type="text" id="catName" placeholder="مثال: جوالات"></div>
+        <div class="form-group"><label>صورة التصنيف</label>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="text" id="catImage" placeholder="رابط الصورة أو ارفع صورة" style="flex:1">
+            <button class="btn-secondary" onclick="uploadCatImage()"><i class="fa-solid fa-upload"></i></button>
+            <img id="catImagePreview" style="width:48px;height:48px;border-radius:10px;object-fit:cover;display:none;border:2px solid var(--border)">
+          </div>
+        </div>
+        <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="catIsBrand" style="width:16px;height:16px"> علامة تجارية (يظهر في فلتر الماركات)</label></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" id="catSubmitBtn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة تصنيف</button>
+          <button class="btn-secondary" id="catCancelBtn" onclick="cancelEditCategory()" style="display:none"><i class="fa-solid fa-xmark"></i> إلغاء</button>
+        </div>
+      </div>
+      <!-- Search & Bulk selection tools -->
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px">
+        <div style="position:relative;flex:1;min-width:200px">
+          <input type="text" id="catSearchInput" placeholder="ابحث عن تصنيف..." oninput="renderCategoriesList()" style="width:100%;padding:8px 12px 8px 35px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+          <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none"></i>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;font-weight:700">
+            <input type="checkbox" id="selectAllCatsBtn" onchange="toggleSelectAllCats(this)" style="width:16px;height:16px"> تحديد الكل
+          </label>
+          <button id="bulkDeleteCatsBtn" class="btn-secondary" onclick="bulkDeleteCategories()" style="padding:6px 12px;font-size:.78rem;color:#ef4444;border-color:rgba(239,68,68,.3);display:none;align-items:center;gap:4px">
+            <i class="fa-solid fa-trash"></i> حذف المحدد
+          </button>
+        </div>
+      </div>
+      <div id="categoriesList"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="tab-content" id="tab-settings">
+      <div class="section-header"><h3>الإعدادات</h3></div>
+      <div class="settings-grid">
+        <div class="card"><h4><i class="fa-solid fa-store"></i> معلومات الهيدر والشعار</h4>
+          <div class="form-group"><label>اسم المتجر</label><input type="text" id="setStoreName" value="متجري"></div>
+          <div class="form-group"><label>وصف المتجر (Tagline)</label><input type="text" id="setStoreTagline" placeholder="اختر منتجك المفضل"></div>
+          <div class="form-group"><label>طريقة عرض الهيدر والشعار</label>
+            <select id="setHeaderDisplayMode" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+              <option value="both">إظهار الشعار + اسم المتجر والوصف</option>
+              <option value="logo_only">إظهار الشعار فقط</option>
+              <option value="text_only">إظهار اسم المتجر والوصف فقط (إخفاء الشعار)</option>
+              <option value="none">إخفاء الشعار والاسم والوصف بالكامل</option>
+            </select>
+          </div>
+          <div class="form-group"><label>صورة الشعار</label>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <img id="setLogoPreview" class="preview-img" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:1px solid var(--border);display:none">
+              <button type="button" class="btn-secondary" onclick="document.getElementById('logoUpload').click()"><i class="fa-solid fa-upload"></i> تغيير الشعار</button>
+              <button type="button" class="btn-danger" id="removeLogoBtn" onclick="removeSettingLogo()" style="display:none;padding:8px 12px;font-size:.8rem"><i class="fa-solid fa-trash"></i> إزالة الشعار</button>
+              <input type="file" id="logoUpload" accept="image/*" style="display:none" onchange="uploadSettingLogo(event)">
+            </div>
+          </div>
+        </div>
+        <div class="card"><h4><i class="fa-solid fa-sliders"></i> إعدادات العامة وخلفية الهيدر</h4>
+          <div class="form-group"><label>كود تجار الجملة</label><input type="text" id="setWholesaleCode"></div>
+          <div class="form-group"><label>العملة</label><input type="text" id="setCurrency" maxlength="5"></div>
+          <div class="form-group"><label>اللون الأساسي</label><div style="display:flex;gap:8px;align-items:center"><input type="color" id="setAccent" value="#ef4444" oninput="document.getElementById('setAccentVal').textContent=this.value" style="width:44px;height:40px;border:none;border-radius:6px;cursor:pointer;padding:0;background:none"><span style="font-size:.75rem;color:var(--text-muted)" id="setAccentVal">#ef4444</span></div></div>
+          <div class="form-group"><label>خلفية الهيدر</label>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button type="button" class="btn-secondary" onclick="document.getElementById('bgUpload').click()"><i class="fa-solid fa-image"></i> تغيير الخلفية</button>
+              <button type="button" class="btn-danger" onclick="removeBg()" style="padding:8px 12px;font-size:.8rem"><i class="fa-solid fa-trash"></i> إزالة الخلفية</button>
+              <input type="file" id="bgUpload" accept="image/*" style="display:none" onchange="uploadBg(event)">
+            </div>
+          </div>
+          <button type="button" class="btn-primary" onclick="saveSettings()" style="margin-top:16px;width:100%"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات والشعار</button>
+        </div>
+        <div class="card"><h4><i class="fa-solid fa-database"></i> البيانات</h4>
+          <div class="form-group" style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="exportAllData()"><i class="fa-solid fa-file-export"></i> تصدير كل البيانات</button>
+            <button class="btn-secondary" onclick="document.getElementById('importDataFile').click()"><i class="fa-solid fa-file-import"></i> استيراد</button>
+            <input type="file" id="importDataFile" accept=".json" style="display:none" onchange="importAllData(event)">
+            <button class="btn-danger" onclick="resetAllData()"><i class="fa-solid fa-trash"></i> إعادة تعيين الكل</button>
+          </div>
+          <div id="dataStatus" style="font-size:.8rem;color:var(--text-muted);margin-top:8px"></div>
+        </div>
+        <div class="card"><h4><i class="fa-solid fa-truck"></i> مناطق التوصيل</h4>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="zoneName" placeholder="اسم المنطقة" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+            <input type="number" id="zonePrice" placeholder="السعر" min="0" step="0.5" style="width:80px;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+            <button class="btn-primary" onclick="addZone()" style="padding:8px 14px;font-size:.8rem"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <div id="zonesList"></div>
+        </div>
+        <div class="card" style="grid-column:1/-1;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border:1px solid #334155">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <h4 style="color:#fff;margin:0"><i class="fa-solid fa-crown" style="color:#f59e0b"></i> اشتراك المتجر والترقية (SaaS Billing)</h4>
+            <a href="../../agency/index.html" target="_blank" style="font-size:.75rem;color:#3b82f6;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px"><i class="fa-solid fa-up-right-from-square"></i> منصة الشركة الرئيسيّة</a>
+          </div>
+          <div id="adminStandaloneSubStatus"></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveSettings()" style="margin-top:16px"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات</button>
+    </div>
+
+    <!-- APPEARANCE -->
+    <div class="tab-content" id="tab-appearance">
+      <div class="section-header">
+        <h3>المظهر والتخطيط</h3>
+        <div style="margin-right:auto;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-secondary" onclick="resetAppearance()"><i class="fa-solid fa-rotate-left"></i> إعادة تعيين</button>
+          <button class="btn-secondary" onclick="exportAppearance()"><i class="fa-solid fa-file-export"></i> تصدير</button>
+          <button class="btn-secondary" onclick="document.getElementById('importAppearanceFile').click()"><i class="fa-solid fa-file-import"></i> استيراد</button>
+          <input type="file" id="importAppearanceFile" accept=".json" style="display:none" onchange="importAppearance(event)">
+          <button class="btn-primary" onclick="saveAppearance()"><i class="fa-solid fa-floppy-disk"></i> حفظ المظهر</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:16px;align-items:flex-start;margin-top:16px">
+      <div class="appearance-layout" style="flex:1;min-width:0">
+        <nav class="appearance-nav">
+          <button class="app-nav-btn active" data-sec="presets" onclick="switchAppSec(this)"><i class="fa-solid fa-wand-magic-sparkles"></i> الثيمات الجاهزة</button>
+          <button class="app-nav-btn" data-sec="colors" onclick="switchAppSec(this)"><i class="fa-solid fa-palette"></i> الألوان</button>
+          <button class="app-nav-btn" data-sec="typography" onclick="switchAppSec(this)"><i class="fa-solid fa-font"></i> الخطوط</button>
+          <button class="app-nav-btn" data-sec="layout" onclick="switchAppSec(this)"><i class="fa-solid fa-columns"></i> التخطيط</button>
+          <button class="app-nav-btn" data-sec="images" onclick="switchAppSec(this)"><i class="fa-solid fa-image"></i> صور المنتجات</button>
+          <button class="app-nav-btn" data-sec="cards" onclick="switchAppSec(this)"><i class="fa-solid fa-border-all"></i> البطاقات والأزرار</button>
+          <button class="app-nav-btn" data-sec="header" onclick="switchAppSec(this)"><i class="fa-solid fa-mobile-screen"></i> الهيدر</button>
+          <button class="app-nav-btn" data-sec="nav" onclick="switchAppSec(this)"><i class="fa-solid fa-bars"></i> التنقل السفلي</button>
+          <button class="app-nav-btn" data-sec="product" onclick="switchAppSec(this)"><i class="fa-solid fa-tags"></i> عناصر المنتج</button>
+          <button class="app-nav-btn" data-sec="spacing" onclick="switchAppSec(this)"><i class="fa-solid fa-arrows-left-right"></i> المسافات</button>
+        </nav>
+
+        <div class="appearance-panels">
+          <!-- PRESETS -->
+          <section class="app-panel active" id="appsec-presets">
+            <h4 class="app-sec-title"><i class="fa-solid fa-wand-magic-sparkles"></i> ثيمات جاهزة</h4>
+            <p class="app-sec-desc">اختر ثيماً جاهزاً يطبّق مجموعة متناسقة من الألوان والخطوط دفعة واحدة.</p>
+            <div class="preset-grid" id="presetGrid"></div>
+          </section>
+
+          <!-- COLORS -->
+          <section class="app-panel" id="appsec-colors">
+            <h4 class="app-sec-title"><i class="fa-solid fa-palette"></i> الألوان</h4>
+            <div class="app-fields">
+              <div class="app-field"><label>اللون الأساسي (Accent)</label><div class="color-row"><input type="color" id="appAccent" oninput="updVal('appAccent');previewAppearance();liveAppPreview()"><span id="appAccentVal" class="color-val">#ef4444</span></div></div>
+              <div class="app-field"><label>لون التمرير (Accent Hover)</label><div class="color-row"><input type="color" id="appAccentHover" oninput="updVal('appAccentHover');previewAppearance();liveAppPreview()"><span id="appAccentHoverVal" class="color-val">#dc2626</span></div></div>
+              <div class="app-field"><label>لون الخلفية</label><div class="color-row"><input type="color" id="appBgColor" oninput="updVal('appBgColor');previewAppearance();liveAppPreview()"><span id="appBgColorVal" class="color-val">#f8fafc</span></div></div>
+              <div class="app-field"><label>لون البطاقات</label><div class="color-row"><input type="color" id="appCardColor" oninput="updVal('appCardColor');previewAppearance();liveAppPreview()"><span id="appCardColorVal" class="color-val">#ffffff</span></div></div>
+              <div class="app-field"><label>لون النصوص</label><div class="color-row"><input type="color" id="appTextColor" oninput="updVal('appTextColor');previewAppearance();liveAppPreview()"><span id="appTextColorVal" class="color-val">#1e293b</span></div></div>
+              <div class="app-field"><label>لون النصوص الخافتة</label><div class="color-row"><input type="color" id="appTextMuted" oninput="updVal('appTextMuted');previewAppearance();liveAppPreview()"><span id="appTextMutedVal" class="color-val">#64748b</span></div></div>
+              <div class="app-field"><label>لون الحدود</label><div class="color-row"><input type="color" id="appBorderColor" oninput="updVal('appBorderColor');previewAppearance();liveAppPreview()"><span id="appBorderColorVal" class="color-val">#e2e8f0</span></div></div>
+              <div class="app-field"><label>لون السعر</label><div class="color-row"><input type="color" id="appPriceColor" oninput="updVal('appPriceColor');previewAppearance();liveAppPreview()"><span id="appPriceColorVal" class="color-val">#ef4444</span></div></div>
+              <div class="app-field"><label>لون شارة الخصم</label><div class="color-row"><input type="color" id="appSaleColor" oninput="updVal('appSaleColor');previewAppearance();liveAppPreview()"><span id="appSaleColorVal" class="color-val">#ef4444</span></div></div>
+              <div class="app-field"><label>لون النجاح (تأكيد/وتساب)</label><div class="color-row"><input type="color" id="appSuccessColor" oninput="updVal('appSuccessColor');previewAppearance();liveAppPreview()"><span id="appSuccessColorVal" class="color-val">#10b981</span></div></div>
+              <div class="app-field app-field-full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="appDarkMode" onchange="previewAppearance();liveAppPreview()"> تفعيل الوضع الداكن افتراضياً</label></div>
+            </div>
+          </section>
+
+          <!-- TYPOGRAPHY -->
+          <section class="app-panel" id="appsec-typography">
+            <h4 class="app-sec-title"><i class="fa-solid fa-font"></i> الخطوط</h4>
+            <div class="app-fields">
+              <div class="app-field"><label>خط العناوين</label><select id="appFontHeading" onchange="previewAppearance();liveAppPreview()"><option value="'Tajawal',sans-serif">Tajawal</option><option value="'Cairo',sans-serif">Cairo</option><option value="'Amiri',serif">Amiri</option><option value="'Noto Sans Arabic',sans-serif">Noto Sans Arabic</option><option value="'Almarai',sans-serif">Almarai</option></select></div>
+              <div class="app-field"><label>خط المحتوى</label><select id="appFontBody" onchange="previewAppearance();liveAppPreview()"><option value="'Tajawal',sans-serif">Tajawal</option><option value="'Cairo',sans-serif">Cairo</option><option value="'Amiri',serif">Amiri</option><option value="'Noto Sans Arabic',sans-serif">Noto Sans Arabic</option><option value="'Almarai',sans-serif">Almarai</option></select></div>
+              <div class="app-field"><label>حجم الخط الأساسي</label><div class="color-row"><input type="range" id="appFontSize" min="13" max="18" value="15" oninput="updVal('appFontSize','px');previewAppearance();liveAppPreview()"><span id="appFontSizeVal" class="color-val">15px</span></div></div>
+              <div class="app-field"><label>مقياس العناوين</label><div class="color-row"><input type="range" id="appHeadingScale" min="90" max="130" value="100" oninput="updVal('appHeadingScale','%');previewAppearance();liveAppPreview()"><span id="appHeadingScaleVal" class="color-val">100%</span></div></div>
+              <div class="app-field"><label>وزن الخط</label><select id="appFontWeight" onchange="previewAppearance();liveAppPreview()"><option value="400">عادي</option><option value="500">متوسط</option><option value="700" selected>عريض</option><option value="800">عريض جداً</option></select></div>
+              <div class="app-field"><label>ارتفاع السطر</label><div class="color-row"><input type="range" id="appLineHeight" min="13" max="20" value="15" oninput="updVal('appLineHeight','.');previewAppearance();liveAppPreview()"><span id="appLineHeightVal" class="color-val">1.5</span></div></div>
+            </div>
+          </section>
+
+          <!-- LAYOUT -->
+          <section class="app-panel" id="appsec-layout">
+            <h4 class="app-sec-title"><i class="fa-solid fa-columns"></i> تخطيط الصفحة الرئيسية</h4>
+            <div class="app-fields">
+              <div class="app-field app-field-full app-toggles">
+                <label class="app-toggle"><input type="checkbox" id="appShowBanners" onchange="previewAppearance();liveAppPreview()"> البانرات</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowFlashSales" onchange="previewAppearance();liveAppPreview()"> عروض فلاش</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowFeatured" onchange="previewAppearance();liveAppPreview()"> المميزة</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowCategories" onchange="previewAppearance();liveAppPreview()"> التصنيفات</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowBrands" onchange="previewAppearance();liveAppPreview()"> الماركات</label>
+              </div>
+              <div class="app-field"><label>أعمدة (كمبيوتر)</label><select id="appGridColsDesktop" onchange="previewAppearance();liveAppPreview()"><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option><option value="7">7</option></select></div>
+              <div class="app-field"><label>أعمدة (تابلت)</label><select id="appGridColsTablet" onchange="previewAppearance();liveAppPreview()"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></div>
+              <div class="app-field"><label>أعمدة (جوال)</label><select id="appGridColsMobile" onchange="previewAppearance();liveAppPreview()"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></div>
+              <div class="app-field"><label>تباعد الشبكة</label><div class="color-row"><input type="range" id="appGridGap" min="6" max="24" value="14" oninput="updVal('appGridGap','px');previewAppearance();liveAppPreview()"><span id="appGridGapVal" class="color-val">14px</span></div></div>
+            </div>
+          </section>
+
+          <!-- IMAGES -->
+          <section class="app-panel" id="appsec-images">
+            <h4 class="app-sec-title"><i class="fa-solid fa-image"></i> صور المنتجات</h4>
+            <div class="app-fields">
+              <div class="app-field"><label>نسبة الصورة</label><select id="appImgRatio" onchange="previewAppearance();liveAppPreview()"><option value="1">مربع 1:1</option><option value="4/3">4:3</option><option value="3/4" selected>3:4 عمودي</option><option value="2/3">2:3 عمودي مطول</option><option value="9/16">9:16 عمودي كامل</option><option value="16/9">16:9 عرضي</option><option value="3/2">3:2 عرضي كلاسيكي</option><option value="5/4">5:4 شبه مربع</option></select></div>
+              <div class="app-field"><label>زوايا الصورة</label><div class="color-row"><input type="range" id="appImgRadius" min="0" max="24" value="12" oninput="updVal('appImgRadius','px');previewAppearance();liveAppPreview()"><span id="appImgRadiusVal" class="color-val">12px</span></div></div>
+              <div class="app-field app-field-full app-toggles">
+                <label class="app-toggle"><input type="checkbox" id="appImgHoverZoom" onchange="previewAppearance();liveAppPreview()"> تكبير عند التحويم</label>
+                <label class="app-toggle"><input type="checkbox" id="appImgLazyLoad" onchange="previewAppearance();liveAppPreview()"> تحميل كسول</label>
+              </div>
+            </div>
+          </section>
+
+          <!-- CARDS & BUTTONS -->
+          <section class="app-panel" id="appsec-cards">
+            <h4 class="app-sec-title"><i class="fa-solid fa-border-all"></i> البطاقات والأزرار</h4>
+            <div class="app-fields">
+              <div class="app-field"><label>زوايا البطاقات</label><div class="color-row"><input type="range" id="appCardRadius" min="0" max="28" value="16" oninput="updVal('appCardRadius','px');previewAppearance();liveAppPreview()"><span id="appCardRadiusVal" class="color-val">16px</span></div></div>
+              <div class="app-field"><label>زوايا الأزرار</label><div class="color-row"><input type="range" id="appBtnRadius" min="0" max="28" value="12" oninput="updVal('appBtnRadius','px');previewAppearance();liveAppPreview()"><span id="appBtnRadiusVal" class="color-val">12px</span></div></div>
+              <div class="app-field"><label>ستايل البطاقة</label><select id="appCardStyle" onchange="previewAppearance();liveAppPreview()"><option value="shadow" selected>ظل</option><option value="outline">إطار</option><option value="flat">مسطح</option></select></div>
+              <div class="app-field"><label>ستايل الزر</label><select id="appBtnStyle" onchange="previewAppearance();liveAppPreview()"><option value="solid" selected>معبأ</option><option value="outline">إطار</option><option value="soft">ناعم</option></select></div>
+              <div class="app-field app-field-full app-toggles">
+                <label class="app-toggle"><input type="checkbox" id="appShadows" onchange="previewAppearance();liveAppPreview()"> تفعيل الظلال</label>
+              </div>
+              <div class="app-field"><label>شدة الظل</label><div class="color-row"><input type="range" id="appShadowIntensity" min="0" max="200" value="100" oninput="updVal('appShadowIntensity','%');previewAppearance();liveAppPreview()"><span id="appShadowIntensityVal" class="color-val">100%</span></div></div>
+            </div>
+          </section>
+
+          <!-- HEADER -->
+          <section class="app-panel" id="appsec-header">
+            <h4 class="app-sec-title"><i class="fa-solid fa-mobile-screen"></i> الهيدر</h4>
+            <div id="admin-header-deco"></div>
+            <div class="app-fields">
+              <div class="app-field app-field-full app-toggles">
+                <label class="app-toggle"><input type="checkbox" id="appStickyHeader" onchange="previewAppearance();liveAppPreview()"> هيدر ثابت</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowSearch" onchange="previewAppearance();liveAppPreview()"> زر البحث</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowWishlist" onchange="previewAppearance();liveAppPreview()"> المفضلة</label>
+              </div>
+              <div class="app-field"><label>بداية تدرج الهيدر</label><div class="color-row"><input type="color" id="appHeaderFrom" oninput="updVal('appHeaderFrom');previewAppearance();liveAppPreview()"><span id="appHeaderFromVal" class="color-val">#ef4444</span></div></div>
+              <div class="app-field"><label>نهاية تدرج الهيدر</label><div class="color-row"><input type="color" id="appHeaderTo" oninput="updVal('appHeaderTo');previewAppearance();liveAppPreview()"><span id="appHeaderToVal" class="color-val">#dc2626</span></div></div>
+              <div class="app-field"><label>لون نص الهيدر</label><div class="color-row"><input type="color" id="appHeaderText" oninput="updVal('appHeaderText');previewAppearance();liveAppPreview()"><span id="appHeaderTextVal" class="color-val">#ffffff</span></div></div>
+              <div class="app-field"><label>ارتفاع الهيدر</label><div class="color-row"><input type="range" id="appHeaderPadding" min="20" max="70" value="40" oninput="updVal('appHeaderPadding','px');previewAppearance();liveAppPreview()"><span id="appHeaderPaddingVal" class="color-val">40px</span></div></div>
+            </div>
+          </section>
+
+          <!-- NAV -->
+          <section class="app-panel" id="appsec-nav">
+            <h4 class="app-sec-title"><i class="fa-solid fa-bars"></i> التنقل السفلي</h4>
+            <div class="app-fields">
+              <div class="app-field"><label>النمط</label><select id="appNavStyle" onchange="previewAppearance();liveAppPreview()"><option value="default" selected>افتراضي</option><option value="pill">أقراص</option><option value="minimal">مبسط</option></select></div>
+              <div class="app-field app-field-full app-toggles">
+                <label class="app-toggle"><input type="checkbox" id="appShowCartCount" onchange="previewAppearance();liveAppPreview()"> عداد السلة</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowNavLabels" onchange="previewAppearance();liveAppPreview()"> تسميات الأيقونات</label>
+              </div>
+              <div class="app-field"><label>خلفية التنقل</label><div class="color-row"><input type="color" id="appNavBg" oninput="updVal('appNavBg');previewAppearance();liveAppPreview()"><span id="appNavBgVal" class="color-val">#ffffff</span></div></div>
+              <div class="app-field"><label>لون العنصر النشط</label><div class="color-row"><input type="color" id="appNavActive" oninput="updVal('appNavActive');previewAppearance();liveAppPreview()"><span id="appNavActiveVal" class="color-val">#ef4444</span></div></div>
+            </div>
+          </section>
+
+          <!-- PRODUCT ELEMENTS -->
+          <section class="app-panel" id="appsec-product">
+            <h4 class="app-sec-title"><i class="fa-solid fa-tags"></i> عناصر المنتج</h4>
+            <div class="app-fields">
+              <div class="app-field app-field-full app-toggles">
+                <label class="app-toggle"><input type="checkbox" id="appShowBrand" onchange="previewAppearance();liveAppPreview()"> الماركة</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowOldPrice" onchange="previewAppearance();liveAppPreview()"> السعر القديم</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowDiscountBadge" onchange="previewAppearance();liveAppPreview()"> شارة الخصم</label>
+                <label class="app-toggle"><input type="checkbox" id="appShowQuickAdd" onchange="previewAppearance();liveAppPreview()"> زر الإضافة السريعة</label>
+              </div>
+            </div>
+          </section>
+
+          <!-- SPACING -->
+          <section class="app-panel" id="appsec-spacing">
+            <h4 class="app-sec-title"><i class="fa-solid fa-arrows-left-right"></i> المسافات</h4>
+            <div class="app-fields">
+              <div class="app-field"><label>هامش الصفحة</label><div class="color-row"><input type="range" id="appPagePadding" min="0" max="32" value="16" oninput="updVal('appPagePadding','px');previewAppearance();liveAppPreview()"><span id="appPagePaddingVal" class="color-val">16px</span></div></div>
+              <div class="app-field"><label>تباعد الأقسام</label><div class="color-row"><input type="range" id="appSectionGap" min="8" max="48" value="24" oninput="updVal('appSectionGap','px');previewAppearance();liveAppPreview()"><span id="appSectionGapVal" class="color-val">24px</span></div></div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="app-preview-wrap" style="width:260px;flex-shrink:0;position:sticky;top:80px;align-self:flex-start">
+        <div style="font-size:.75rem;font-weight:800;color:#64748b;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-eye" style="color:#8b5cf6"></i> معاينة حية</div>
+        <div class="app-preview-box" id="appPreviewBox"></div>
+        <div style="margin-top:6px;font-size:.6rem;color:#94a3b8;text-align:center">التغييرات تظهر فوراً</div>
+      </div>
+      </div>
+      <div id="appearanceStatus" style="font-size:.8rem;color:var(--text-muted);margin-top:12px"></div>
+    </div>
+
+    <!-- BANNERS -->
+    <div class="tab-content" id="tab-banners">
+      <div class="section-header"><h3>البانرات الإعلانية</h3></div>
+      <div id="bannersFullPage" style="padding:16px 0">
+        <p style="color:var(--text-muted)">جاري تحميل إدارة البانرات...</p>
+      </div>
+    </div>
+
+    <!-- COUPONS -->
+    <div class="tab-content" id="tab-coupons">
+      <div class="section-header">
+        <h3><i class="fa-solid fa-ticket" style="color:#f59e0b"></i> إدارة أكواد الخصم والكوبونات</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-secondary" onclick="exportCoupons()"><i class="fa-solid fa-file-export"></i> تصدير</button>
+          <button class="btn-secondary" onclick="document.getElementById('importCouponsFile').click()"><i class="fa-solid fa-file-import"></i> استيراد</button>
+          <input type="file" id="importCouponsFile" accept=".json" style="display:none" onchange="importCoupons(event)">
+          <button class="btn-primary" onclick="openCouponForm()"><i class="fa-solid fa-plus"></i> كوبون جديد</button>
+        </div>
+      </div>
+
+      <!-- إحصائيات سريعة -->
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:20px">
+        <div class="stat-card"><i class="fa-solid fa-ticket" style="color:#f59e0b"></i><div><span id="statCouponsTotal">0</span><p>إجمالي الكوبونات</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-circle-check" style="color:#16a34a"></i><div><span id="statCouponsActive">0</span><p>النشطة</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-clock" style="color:#ef4444"></i><div><span id="statCouponsExpired">0</span><p>منتهية الصلاحية</p></div></div>
+        <div class="stat-card"><i class="fa-solid fa-coins" style="color:#3b82f6"></i><div><span id="statCouponsUsed">0</span><p>مجموع الاستخدامات</p></div></div>
+      </div>
+
+      <!-- أدوات الفلترة والبحث -->
+      <div class="card" style="margin-bottom:20px;padding:14px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.8rem;font-weight:700;margin-bottom:4px;display:block"><i class="fa-solid fa-search"></i> بحث</label>
+            <input type="text" id="couponSearch" placeholder="بحث بالكود أو الوصف..." oninput="renderAdminCoupons()" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;width:100%">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.8rem;font-weight:700;margin-bottom:4px;display:block"><i class="fa-solid fa-filter"></i> الحالة</label>
+            <select id="couponStatusFilter" onchange="renderAdminCoupons()" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;width:100%;background:var(--card);color:var(--text)">
+              <option value="">جميع الحالات</option>
+              <option value="active">نشط</option>
+              <option value="expired">منتهي</option>
+              <option value="exhausted">مستنفذ</option>
+              <option value="not_started">لم يبدأ</option>
+              <option value="inactive">متوقف</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.8rem;font-weight:700;margin-bottom:4px;display:block"><i class="fa-solid fa-layer-group"></i> النوع</label>
+            <select id="couponTypeFilter" onchange="renderAdminCoupons()" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;width:100%;background:var(--card);color:var(--text)">
+              <option value="">الكل</option>
+              <option value="percent">نسبة مئوية %</option>
+              <option value="fixed">قيمة ثابتة</option>
+              <option value="freeship">شحن مجاني</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.8rem;font-weight:700;margin-bottom:4px;display:block"><i class="fa-solid fa-sort"></i> ترتيب حسب</label>
+            <select id="couponSortBy" onchange="renderAdminCoupons()" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;width:100%;background:var(--card);color:var(--text)">
+              <option value="createdAt">الأحدث إنشاءً</option>
+              <option value="endDate">الأقرب انتهاءً</option>
+              <option value="uses">الأكثر استخداماً</option>
+              <option value="value">الأعلى قيمة</option>
+              <option value="code">الكود (أ-ي)</option>
+            </select>
+          </div>
+          <button class="btn-secondary" onclick="clearCouponFilters()" style="padding:8px 14px;font-size:.85rem"><i class="fa-solid fa-rotate-left"></i> مسح الفلاتر</button>
+        </div>
+      </div>
+
+      <!-- قائمة الكوبونات -->
+      <div id="adminCouponsList" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+
+    <!-- نموذج إضافة/تعديل كوبون (Modal) -->
+    <div id="couponFormModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:16px">
+      <div id="couponFormCard" style="background:var(--card);border-radius:18px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 25px 50px rgba(0,0,0,.25)">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem"><i class="fa-solid fa-ticket"></i></div>
+          <h3 id="couponFormTitle" style="margin:0;flex:1;font-size:1.05rem">كوبون خصم جديد</h3>
+          <button onclick="closeCouponForm()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);padding:4px 8px"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div style="padding:20px">
+          <form id="couponForm" onsubmit="submitCouponForm(event)">
+            <input type="hidden" id="cpnId">
+            <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+              <div class="form-group" style="grid-column:1/-1">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block">كود الكوبون * <span style="font-weight:400;color:var(--text-muted);font-size:.75rem">(يدخل المستخدم هذا الكود)</span></label>
+                <div style="display:flex;gap:6px">
+                  <input type="text" id="cpnCode" required placeholder="مثال: SAVE20 أو EID100" style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px">
+                  <button type="button" onclick="generateCouponCode()" class="btn-secondary" style="padding:10px 14px;font-size:.85rem"><i class="fa-solid fa-wand-magic-sparkles"></i> توليد</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block">نوع الخصم *</label>
+                <select id="cpnType" onchange="toggleCpnValueField()" required style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;background:var(--card);color:var(--text)">
+                  <option value="percent">نسبة مئوية %</option>
+                  <option value="fixed">قيمة ثابتة (مبلغ)</option>
+                  <option value="freeship">شحن مجاني</option>
+                </select>
+              </div>
+              <div class="form-group" id="cpnValueGroup">
+                <label id="cpnValueLabel" style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block">قيمة الخصم (%) *</label>
+                <input type="number" id="cpnValue" min="1" max="100" step="0.01" placeholder="مثال: 20" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem">
+              </div>
+              <div class="form-group" id="cpnMaxDiscountGroup">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block">حد أقصى للخصم <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(اختياري - للنسبة المئوية فقط)</span></label>
+                <input type="number" id="cpnMaxDiscount" min="0" step="0.5" placeholder="0 = بدون حد" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem">
+              </div>
+              <div class="form-group">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block">الحد الأدنى للطلب</label>
+                <input type="number" id="cpnMinOrder" min="0" step="0.5" placeholder="0 = بدون حد أدنى" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem">
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block">وصف الكوبون <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(يظهر للمستخدمين في كاشف الكوبونات)</span></label>
+                <input type="text" id="cpnDescription" placeholder="مثال: خصم عيد الفطر على جميع المنتجات" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem">
+              </div>
+
+              <div class="form-group" style="background:rgba(59,130,246,.05);padding:12px;border-radius:10px;border:1px dashed rgba(59,130,246,.3)">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block;color:#1d4ed8"><i class="fa-solid fa-calendar-plus"></i> تاريخ بدء السريان</label>
+                <input type="datetime-local" id="cpnStartDate" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+                <p style="font-size:.72rem;color:var(--text-muted);margin:5px 0 0">اتركه فارغاً لتبدأ فوراً</p>
+              </div>
+              <div class="form-group" style="background:rgba(239,68,68,.05);padding:12px;border-radius:10px;border:1px dashed rgba(239,68,68,.3)">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block;color:#b91c1c"><i class="fa-solid fa-hourglass-half"></i> تاريخ انتهاء الصلاحية (استخدمها أو اخسرها)</label>
+                <input type="datetime-local" id="cpnEndDate" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+                  <button type="button" onclick="setCouponEndDate(1)" class="btn-secondary" style="padding:5px 10px;font-size:.72rem"><i class="fa-solid fa-clock"></i> 24 ساعة</button>
+                  <button type="button" onclick="setCouponEndDate(3)" class="btn-secondary" style="padding:5px 10px;font-size:.72rem">3 أيام</button>
+                  <button type="button" onclick="setCouponEndDate(7)" class="btn-secondary" style="padding:5px 10px;font-size:.72rem">أسبوع</button>
+                  <button type="button" onclick="setCouponEndDate(30)" class="btn-secondary" style="padding:5px 10px;font-size:.72rem">شهر</button>
+                </div>
+                <p style="font-size:.72rem;color:var(--text-muted);margin:5px 0 0">اتركه فارغاً = بدون انتهاء</p>
+              </div>
+
+              <div class="form-group">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block"><i class="fa-solid fa-users"></i> الحد الأقصى للاستخدام (إجمالي)</label>
+                <input type="number" id="cpnLimit" min="0" placeholder="0 = غير محدود" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem">
+              </div>
+              <div class="form-group">
+                <label style="font-size:.85rem;font-weight:700;margin-bottom:5px;display:block"><i class="fa-solid fa-user"></i> حد الاستخدام لكل مستخدم</label>
+                <input type="number" id="cpnPerUserLimit" min="0" placeholder="0 = غير محدود" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem">
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:.9rem;margin-top:4px">
+                  <input type="checkbox" id="cpnIsActive" checked style="width:18px;height:18px">
+                  تفعيل الكوبون فور الإنشاء
+                </label>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+              <button type="submit" class="btn-primary" style="flex:1;min-width:160px;padding:12px;font-size:.95rem"><i class="fa-solid fa-floppy-disk"></i> حفظ الكوبون</button>
+              <button type="button" class="btn-secondary" onclick="closeCouponForm()" style="padding:12px 18px;font-size:.95rem"><i class="fa-solid fa-xmark"></i> إلغاء</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKETING -->
+    <div class="tab-content" id="tab-marketing">
+      <div class="section-header"><h3 id="mktPageTitle">التسويق</h3></div>
+
+      <!-- ==================== SUB PANEL: SEO ==================== -->
+      <div class="mkt-subtab-content" id="mkt-sub-seo" style="display:none;">
+        <div class="settings-grid">
+          <!-- SEO -->
+          <div class="card"><h4><i class="fa-solid fa-magnifying-glass"></i> تحسين محركات البحث (SEO)</h4>
+            <div class="form-group"><label>عنوان الموقع</label><input type="text" id="mktSeoTitle" placeholder="متجري - أفضل متجر إلكتروني" oninput="updateSeoPreview()"></div>
+            <div class="form-group"><label>وصف الموقع</label><textarea id="mktSeoDesc" rows="2" placeholder="وصف مختصر للموقع يظهر في محركات البحث" oninput="updateSeoPreview()"></textarea></div>
+            <div class="form-group"><label>كلمات مفتاحية</label><input type="text" id="mktSeoKeywords" placeholder="متجر, تسوق, منتجات, ..."></div>
+            <!-- SEO Preview -->
+            <div class="seo-preview-card" style="margin-top:15px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#f8fafc;">
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;font-weight:700;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-eye"></i> مظهر محركات البحث (SEO)</div>
+              <div id="mktSeoPreviewUrl" style="font-size:0.72rem;color:#475569;direction:ltr;text-align:right;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://yourstore.com</div>
+              <div id="mktSeoPreviewTitle" style="font-size:1.1rem;color:#1a0dab;font-weight:500;cursor:pointer;margin-bottom:4px;word-break:break-word;font-family:sans-serif;">متجري - أفضل متجر إلكتروني</div>
+              <div id="mktSeoPreviewDesc" style="font-size:0.82rem;color:#4d5156;line-height:1.4;word-break:break-word;font-family:sans-serif;">وصف مختصر للموقع يظهر في محركات البحث</div>
+            </div>
+          </div>
+
+        </div>
+        <button class="btn-primary" onclick="saveMarketing()" style="margin-top:16px"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <!-- ==================== SUB PANEL: SOCIAL ==================== -->
+      <div class="mkt-subtab-content" id="mkt-sub-social" style="display:none;">
+        <div class="settings-grid">
+          <!-- Social Links -->
+          <div class="card"><h4><i class="fa-solid fa-share-nodes"></i> التواصل الاجتماعي</h4>
+            <div class="form-group"><label><i class="fa-brands fa-facebook"></i> فيسبوك</label><input type="url" id="mktSocialFb" placeholder="https://facebook.com/..."></div>
+            <div class="form-group"><label><i class="fa-brands fa-instagram"></i> إنستغرام</label><input type="url" id="mktSocialIg" placeholder="https://instagram.com/..."></div>
+            <div class="form-group"><label><i class="fa-brands fa-x-twitter"></i> تويتر / X</label><input type="url" id="mktSocialX" placeholder="https://twitter.com/..."></div>
+            <div class="form-group"><label><i class="fa-brands fa-tiktok"></i> تيك توك</label><input type="url" id="mktSocialTt" placeholder="https://tiktok.com/..."></div>
+            <div class="form-group"><label><i class="fa-brands fa-whatsapp"></i> واتساب</label><input type="url" id="mktSocialWa" placeholder="https://wa.me/..."></div>
+          </div>
+
+          <!-- Social Sharing Buttons -->
+          <div class="card"><h4><i class="fa-solid fa-arrow-up-from-bracket"></i> أزرار مشاركة المنتجات</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktSocialShareShow" style="width:16px;height:16px"> تفعيل أزرار المشاركة
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">يعرض أزرار لنشر روابط المنتجات عبر فيسبوك، واتساب وتويتر.</p>
+          </div>
+
+          <!-- Pixel Tracking -->
+          <div class="card"><h4><i class="fa-solid fa-chart-line"></i> تتبع الإعلانات (Pixels)</h4>
+            <div class="form-group"><label><i class="fa-brands fa-facebook"></i> Facebook Pixel ID</label><input type="text" id="mktFbPixel" placeholder="xxxxxxxxxxxxxxxxxx" style="direction:ltr;letter-spacing:0.5px"></div>
+            <div class="form-group"><label><i class="fa-brands fa-tiktok"></i> TikTok Pixel ID</label><input type="text" id="mktTtPixel" placeholder="xxxxxxxxxxxxxxxxxx" style="direction:ltr;letter-spacing:0.5px"></div>
+            <div class="form-group"><label><i class="fa-brands fa-google"></i> Google Analytics ID</label><input type="text" id="mktGaPixel" placeholder="G-XXXXXXXXXX" style="direction:ltr;letter-spacing:0.5px"></div>
+            <p style="font-size:0.68rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">أدخل معرفات البكسل لتتبع التحويلات وتحسين الإعلانات الرقمية.</p>
+          </div>
+
+        </div>
+        <button class="btn-primary" onclick="saveMarketing()" style="margin-top:16px"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <!-- ==================== SUB PANEL: OFFERS ==================== -->
+      <div class="mkt-subtab-content" id="mkt-sub-offers" style="display:none;">
+        <div class="settings-grid">
+
+          <!-- Volume Discount -->
+          <div class="card"><h4>🏷️ عروض الكميات التراكمية</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktVolDiscShow" style="width:16px;height:16px"> تفعيل عروض الكميات
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 12px;line-height:1.4">تخفيض تلقائي عند شراء كمية أكبر من نفس المنتج.</p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:0.75rem;font-weight:700">نوع الخصم:</span>
+                <select id="mktVolDiscType" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;background:var(--card);color:var(--text)" onchange="toggleVolDiscFields()">
+                  <option value="percent">نسبة مئوية (%)</option>
+                  <option value="fixed">قيمة ثابتة (₪)</option>
+                  <option value="bogo">اشترِ X واحصل على Y مجاناً</option>
+                </select>
+              </div>
+              <div id="volDiscValueFields" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:4px">
+                  <span style="font-size:0.7rem;color:var(--text-muted)">عند شراء 2:</span>
+                  <input type="number" id="mktVolDisc2" min="1" value="5" style="width:60px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem">
+                </div>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <span style="font-size:0.7rem;color:var(--text-muted)">عند شراء 3+:</span>
+                  <input type="number" id="mktVolDisc3" min="1" value="10" style="width:60px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem">
+                </div>
+              </div>
+              <div id="volDiscBogoFields" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:4px">
+                  <span style="font-size:0.7rem;color:var(--text-muted)">اشترِ:</span>
+                  <input type="number" id="mktVolBogoBuy" min="1" value="2" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem">
+                  <span style="font-size:0.7rem;color:var(--text-muted)">واحصل على:</span>
+                  <input type="number" id="mktVolBogoGet" min="1" value="1" style="width:50px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem">
+                  <span style="font-size:0.7rem;color:var(--text-muted)">مجاناً!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Frequently Bought Together -->
+          <div class="card"><h4>📦 حزمة "اشترِ معاً ووفر"</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktFbtShow" style="width:16px;height:16px"> تفعيل حزمة اشترِ معاً
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 12px;line-height:1.4">عرض حزمة لمنتجين متكاملين معاً بخصم إضافي لتحفيز الشراء المزدوج.</p>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:4px">
+                <span style="font-size:0.7rem;color:var(--text-muted)">خصم الحزمة:</span>
+                <input type="number" id="mktFbtDiscount" min="1" max="99" value="10" style="width:60px;padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem">
+                <select id="mktFbtDiscountType" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;background:var(--card);color:var(--text)">
+                  <option value="percent">% نسبة مئوية</option>
+                  <option value="fixed">قيمة ثابتة (₪)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Free Shipping Bar -->
+          <div class="card"><h4>🚚 شريط تقدم الشحن المجاني</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktFreeShippingShow" style="width:16px;height:16px"> تفعيل شريط الشحن المجاني
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 12px;line-height:1.4">شريط تفاعلي في السلة يوضح للعميل القيمة المتبقية للتوصيل المجاني.</p>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:0.72rem;color:var(--text-muted)">الحد الأدنى للهدف:</span>
+              <input type="number" id="mktFreeShippingGoal" min="0" value="300" style="width:74px;padding:6px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.8rem">
+              <span style="font-size:0.75rem;color:var(--text-muted)">₪</span>
+            </div>
+          </div>
+
+          <!-- WA Order Redirect -->
+          <div class="card" style="grid-column:1/-1"><h4>📱 تحويل الطلبات تلقائياً إلى واتساب</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktWaNotifShow" style="width:16px;height:16px"> تفعيل التحويل لواتساب
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">عند التفعيل، يفتح واتساب بالفاتورة المنسقة فور نقر العميل على "إتمام الطلب".</p>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveMarketing()" style="margin-top:16px"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <!-- ==================== SUB PANEL: WIDGETS ==================== -->
+      <div class="mkt-subtab-content" id="mkt-sub-widgets" style="display:none;">
+        <div class="settings-grid">
+
+          <!-- Announcement Bar -->
+          <div class="card"><h4>📢 شريط الإعلان العلوي</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktAnnounceShow" style="width:16px;height:16px"> تفعيل شريط الإعلان
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 12px;line-height:1.4">شريط نصي ملون في أعلى شاشة المتجر لجذب الانتباه (مثال: عروض مميزة).</p>
+            <input type="text" id="mktAnnounceText" placeholder="نص الإعلان (مثال: شحن مجاني للطلبات فوق 200 ₪! 🚚)" style="margin-bottom:8px;width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.8rem">
+            <div style="display:flex;gap:10px;align-items:center">
+              <span style="font-size:0.72rem;color:var(--text-muted)">الألوان:</span>
+              <label style="font-size:0.7rem">خلفية:</label>
+              <input type="color" id="mktAnnounceBg" value="#ef4444" style="width:34px;height:26px;border:1px solid var(--border);border-radius:4px;cursor:pointer;padding:1px">
+              <label style="font-size:0.7rem;margin-right:4px">نص:</label>
+              <input type="color" id="mktAnnounceColor" value="#ffffff" style="width:34px;height:26px;border:1px solid var(--border);border-radius:4px;cursor:pointer;padding:1px">
+            </div>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div class="card"><h4>⏳ عداد العرض التنازلي</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktCountdownShow" style="width:16px;height:16px"> تفعيل العداد التنازلي
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 12px;line-height:1.4">عداد تنازلي في تفاصيل المنتج لخلق شعور بالاستعجال للشراء.</p>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:0.75rem;color:var(--text-muted)">مدة العداد (بالدقائق):</span>
+              <input type="number" id="mktCountdownDuration" min="1" max="1440" value="180" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.8rem">
+            </div>
+          </div>
+
+          <!-- Live Viewers -->
+          <div class="card"><h4>🔥 عداد المشاهدين الحيّ</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktLiveViewersShow" style="width:16px;height:16px"> تفعيل عداد المشاهدين
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">يظهر في صفحة المنتج نص مثل: <strong>"🔥 يشاهد هذا المنتج 13 شخصاً الآن!"</strong> — الرقم يتغيّر تلقائياً كل 5 ثوانٍ.</p>
+          </div>
+
+          <!-- WA Floating Chat -->
+          <div class="card"><h4>💬 صندوق دعم واتساب العائم</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktWaChatShow" style="width:16px;height:16px"> تفعيل صندوق الدعم العائم
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 8px;line-height:1.4">زر أخضر ثابت في أسفل الشاشة يأخذ العميل مباشرة لواتساب برسالة ترحيب.</p>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:0.75rem;font-weight:700">نص الترحيب (رسالة الافتتاح)</label>
+              <input type="text" id="mktWaChatGreeting" placeholder="مثال: أهلاً! كيف أستطيع مساعدتك؟" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;width:100%">
+            </div>
+          </div>
+
+          <!-- Social Proof -->
+          <div class="card"><h4>🛍 إشعارات الشراء الحديثة</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktSocialProofShow" style="width:16px;height:16px"> تفعيل إشعارات الشراء
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">نافذة تنبيه صغيرة أسفل الشاشة تُحاكي عمليات شراء حية لبناء المصداقية.</p>
+          </div>
+
+          <!-- WA Checkout button -->
+          <div class="card"><h4>💬 زر الشراء السريع عبر واتساب</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktWaCheckoutShow" style="width:16px;height:16px"> تفعيل زر الشراء السريع
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">يضيف زراً أخضر واضحاً في صفحة المنتج للشراء والتحدث السريع عبر واتساب فوراً.</p>
+          </div>
+
+        </div>
+        <button class="btn-primary" onclick="saveMarketing()" style="margin-top:16px"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <!-- ==================== SUB PANEL: REVIEWS ==================== -->
+      <div class="mkt-subtab-content" id="mkt-sub-reviews" style="display:none;">
+        <div class="settings-grid">
+
+          <!-- Customer Reviews -->
+          <div class="card"><h4>💬 تقييمات المنتج بالنجوم</h4>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-bottom:8px">
+              <input type="checkbox" id="mktReviewsShow" style="width:16px;height:16px"> تفعيل التقييمات
+            </label>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin:4px 0 0;line-height:1.4">يسمح للمشترين بكتابة تقييمات بالنجوم والتعليقات لزيادة ثقة الزوار الجدد.</p>
+          </div>
+
+        </div>
+        <button class="btn-primary" onclick="saveMarketing()" style="margin-top:16px"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <!-- ==================== SUB PANEL: POPUP ==================== -->
+      <div class="mkt-subtab-content" id="mkt-sub-popup" style="display:none;">
+        <div class="settings-grid">
+          <div class="card" style="grid-column: 1 / -1;">
+            <h4>🎁 النافذة الترويجية المنبثقة المتقدمة</h4>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:16px">نافذة ترحيبية متعددة الأنواع تظهر للزائر مع خيارات تخصيص واسعة.</p>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:800;font-size:0.85rem;margin-bottom:14px">
+              <input type="checkbox" id="mktPromoPopupShow" style="width:16px;height:16px"> تفعيل النافذة الترويجية
+            </label>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px">
+
+              <!-- 1. Type -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <label style="font-weight:800;font-size:0.82rem"><i class="fa-solid fa-shapes" style="color:#8b5cf6"></i> نوع النافذة</label>
+                <select id="mktPpType" onchange="adminPpToggleType()" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem;background:var(--card);color:var(--text)">
+                  <option value="discount">🎫 خصم (كود + نسبة)</option>
+                  <option value="announcement">📢 إعلان (رسالة + زر)</option>
+                  <option value="newsletter">📧 اشتراك بريد إلكتروني</option>
+                  <option value="sale">🔥 تخفيضات (مؤقت + نسبة)</option>
+                  <option value="newarrival">🆕 وصل حديثاً</option>
+                  <option value="halfprice">💰 نصف السعر</option>
+                  <option value="custom">✨ مخصص (كامل التحكم)</option>
+                </select>
+              </div>
+
+              <!-- 2. Content -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <label style="font-weight:800;font-size:0.82rem"><i class="fa-solid fa-pen" style="color:#22c55e"></i> المحتوى</label>
+                <div class="form-group" style="margin:0"><label>العنوان</label><input type="text" id="mktPpTitle" placeholder="عرض خاص لفترة محدودة!"></div>
+                <div class="form-group" style="margin:0"><label>النص</label><input type="text" id="mktPpText" placeholder="نص النافذة"></div>
+                <div class="form-group" style="margin:0" id="mktPpCodeGroup"><label>كود الخصم</label><div style="display:flex;gap:4px"><input type="text" id="mktPpCode" placeholder="SPECIAL10" style="flex:1;letter-spacing:1px;font-weight:800"><button type="button" onclick="var c=document.getElementById('mktPpCode');c.value='LUCKY'+Math.random().toString(36).slice(2,6).toUpperCase()" title="توليد" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.8rem">⚡</button></div></div>
+                <div class="form-group" style="margin:0" id="mktPpPctGroup"><label>نسبة الخصم %</label><input type="number" id="mktPpPercent" min="1" max="99" placeholder="10"></div>
+              </div>
+
+              <!-- 3. Media & Button -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <label style="font-weight:800;font-size:0.82rem"><i class="fa-solid fa-image" style="color:#f59e0b"></i> الوسائط والزر</label>
+                <div class="form-group" style="margin:0"><label>صورة النافذة</label><div style="display:flex;gap:6px;flex-wrap:wrap"><input type="text" id="mktPpImage" placeholder="رابط الصورة" style="flex:1;min-width:140px" oninput="mktPpPreviewImage(this.value)"><button type="button" onclick="mktPpUploadImage()" title="رفع صورة" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.78rem;white-space:nowrap"><i class="fa-solid fa-upload"></i> رفع</button><input type="file" id="mktPpFileInput" accept="image/*" style="display:none" onchange="mktPpHandleImageUpload(this)"></div>
+                  <div id="mktPpImagePreview" style="margin-top:6px;display:none"></div></div>
+                <div class="form-group" style="margin:0" id="mktPpBtnTextGroup"><label>نص الزر</label><input type="text" id="mktPpBtnText" placeholder="تسوق العروض الآن 🛍️"></div>
+                <div class="form-group" style="margin:0" id="mktPpBtnLinkGroup"><label>رابط الزر</label><input type="text" id="mktPpBtnLink" placeholder="#offers"></div>
+              </div>
+
+              <!-- 4. Design -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <label style="font-weight:800;font-size:0.82rem"><i class="fa-solid fa-palette" style="color:#ec4899"></i> التصميم</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div class="form-group" style="margin:0"><label>خلفية النافذة</label><input type="color" id="mktPpBg" value="#ffffff" style="width:50px;height:32px"></div>
+                  <div class="form-group" style="margin:0"><label>لون النص</label><input type="color" id="mktPpTextColor" value="#0f172a" style="width:50px;height:32px"></div>
+                  <div class="form-group" style="margin:0"><label>لون التأكيد</label><input type="color" id="mktPpAccent" value="#ef4444" style="width:50px;height:32px"></div>
+                  <div class="form-group" style="margin:0"><label>خلفية الزر</label><input type="color" id="mktPpBtnBg" value="#ef4444" style="width:50px;height:32px"></div>
+                  <div class="form-group" style="margin:0"><label>لون نص الزر</label><input type="color" id="mktPpBtnColor" value="#ffffff" style="width:50px;height:32px"></div>
+                </div>
+              </div>
+
+              <!-- 5. Behaviour -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <label style="font-weight:800;font-size:0.82rem"><i class="fa-solid fa-gear" style="color:#64748b"></i> السلوك</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <div class="form-group" style="margin:0"><label>التأخير (ثوانٍ)</label><input type="number" id="mktPpDelay" min="0" value="3" style="width:70px"></div>
+                  <div class="form-group" style="margin:0"><label>الحجم</label><select id="mktPpSize" style="padding:6px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.8rem"><option value="small">صغير</option><option value="medium" selected>وسط</option><option value="large">كبير</option><option value="fullscreen">ملء الشاشة</option></select></div>
+                  <div class="form-group" style="margin:0"><label>الموضع</label><select id="mktPpPos" style="padding:6px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.8rem"><option value="center" selected>وسط</option><option value="top">أعلى</option><option value="bottom">أسفل</option></select></div>
+                  <div class="form-group" style="margin:0"><label>الحركة</label><select id="mktPpAnim" style="padding:6px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.8rem"><option value="bounce" selected>ارتداد</option><option value="fade">تلاشي</option><option value="slide">انزلاق</option><option value="zoom">تكبير</option></select></div>
+                  <div class="form-group" style="margin:0" id="mktPpExpGroup"><label>انتهاء الكود</label><input type="datetime-local" id="mktPpExpires"></div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                    <label style="display:flex;align-items:center;gap:4px;font-size:.72rem;cursor:pointer"><input type="checkbox" id="mktPpShowClose" checked style="width:14px;height:14px"> زر إغلاق</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:.72rem;cursor:pointer"><input type="checkbox" id="mktPpCloseOutside" checked style="width:14px;height:14px"> إغلاق خارجياً</label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Custom extras (show only for custom type) -->
+          <div class="card" id="mktPpCustomExtras" style="display:none;margin-top:16px">
+            <h4><i class="fa-solid fa-code" style="color:#8b5cf6"></i> خيارات مخصصة</h4>
+            <div class="form-group"><label>أيقونة مخصصة (اسم كلاس Font Awesome)</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="mktPpCustomIcon" placeholder="مثال: fa-star, fa-heart" style="flex:1;font-family:monospace;direction:ltr" oninput="document.getElementById('mktPpCustomIconPrev').className='fa-solid '+this.value||'fa-gift'">
+                <i id="mktPpCustomIconPrev" class="fa-solid fa-gift" style="font-size:1.4rem;color:#ef4444"></i>
+              </div>
+              <div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">أمثلة: fa-star, fa-heart, fa-truck, fa-rocket, fa-crown, fa-bolt</div>
+            </div>
+            <div class="form-group"><label>HTML مخصص (يلغي المحتوى الافتراضي)</label><textarea id="mktPpCustomHtml" rows="4" placeholder="اكتب HTML مخصص للنافذة..." style="font-family:monospace;direction:ltr;font-size:.78rem"></textarea>
+              <div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">اكتب HTML وسيظهر بالكامل داخل النافذة. العنوان والنص والصورة والرمز والكود والزر كلها تخفى.</div>
+            </div>
+          </div>
+
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="saveMarketing()"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+          <button class="btn-secondary" onclick="adminPpTestPreview()"><i class="fa-solid fa-play"></i> معاينة حية</button>
+        </div>
+      </div>
+
+      <!-- Fallback save button for when no sub-panel is showing -->
+      <div id="mktNoPanel" style="display:none;text-align:center;padding:40px;color:var(--text-muted)">
+        <i class="fa-solid fa-bullhorn" style="font-size:3rem;margin-bottom:16px;display:block;opacity:0.3"></i>
+        <p>اختر قسماً تسويقياً من القائمة الجانبية</p>
+      </div>
+    </div>
+
+    <!-- SPIN WHEEL -->
+    <div class="tab-content" id="tab-spinwheel">
+      <div class="section-header">
+        <h3>🎡 إدارة عجلة الحظ التفاعلية</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="spin-wheel.html" target="_blank" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:8px 16px"><i class="fa-solid fa-eye"></i> معاينة الصفحة</a>
+          <button class="btn-primary" onclick="saveSpinWheel()"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <!-- Status Toggle -->
+        <div class="card">
+          <h4><i class="fa-solid fa-power-off" style="color:#22c55e"></i> حالة العجلة</h4>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:0.9rem;margin-top:8px">
+            <input type="checkbox" id="swEnabled" style="width:18px;height:18px"> 🎡 تفعيل عجلة الحظ
+          </label>
+          <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px">عند التفعيل، تظهر العجلة تلقائياً للزوار بعد 6 ثوانٍ من فتح المتجر.</p>
+          <div style="margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);border-radius:10px">
+            <div style="font-size:0.75rem;color:var(--text-muted)">عدد القطاعات: <strong id="swStatCount" style="color:#f59e0b">0</strong></div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">الحالة: <strong id="swStatStatus" style="color:#94a3b8">غير مفعلة</strong></div>
+          </div>
+        </div>
+
+        <!-- Segments List -->
+        <div class="card" style="grid-column:1/-1">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <h4><i class="fa-solid fa-list"></i> قطاعات العجلة والجوائز</h4>
+            <span id="swSegCount" style="font-size:0.75rem;color:var(--text-muted)">0 قطاع</span>
+          </div>
+          <div id="swSegmentsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:12px 0"></div>
+
+          <!-- Add Segment Form -->
+          <div style="background:var(--bg);border:1px dashed var(--border);border-radius:14px;padding:18px;margin-top:12px">
+            <div style="font-size:0.82rem;font-weight:800;margin-bottom:12px"><i class="fa-solid fa-plus-circle" style="color:#22c55e"></i> إضافة قطاع/جائزة جديدة</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+              <div>
+                <label style="font-size:0.7rem;color:var(--text-muted)">اسم الجائزة *</label>
+                <input type="text" id="swNewLabel" placeholder="مثال: خصم 20%" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem">
+              </div>
+              <div>
+                <label style="font-size:0.7rem;color:var(--text-muted)">النوع *</label>
+                <select id="swNewType" onchange="swToggleFields()" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem;background:var(--card);color:var(--text)">
+                  <option value="discount">خصم %</option>
+                  <option value="freeship">شحن مجاني</option>
+                  <option value="none">حظ سعيد (بدون جائزة)</option>
+                </select>
+              </div>
+              <div id="swNewPercentGroup">
+                <label style="font-size:0.7rem;color:var(--text-muted)">نسبة الخصم %</label>
+                <input type="number" id="swNewPercent" min="1" max="99" value="10" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem">
+              </div>
+              <div id="swNewCodeGroup">
+                <label style="font-size:0.7rem;color:var(--text-muted)">كود الخصم</label>
+                <div style="display:flex;gap:4px">
+                  <input type="text" id="swNewCode" placeholder="LUCKY20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px">
+                  <button type="button" onclick="genWheelCode()" title="توليد كود عشوائي" style="padding:8px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.8rem"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.7rem;color:var(--text-muted)">لون القطاع</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="color" id="swNewColor" value="#ef4444" style="width:44px;height:36px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px">
+                  <span id="swNewColorVal" style="font-size:0.75rem;color:var(--text-muted)">#ef4444</span>
+                </div>
+              </div>
+            </div>
+            <div id="swNewLimitRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+              <div style="flex:1;min-width:150px">
+                <label style="font-size:0.7rem;color:var(--text-muted)">عدد مرات الاستخدام (0 = غير محدود)</label>
+                <input type="number" id="swNewLimit" min="0" value="0" placeholder="0" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem">
+              </div>
+            </div>
+            <button onclick="addSpinSegment()" class="btn-secondary" style="margin-top:12px;padding:8px 20px"><i class="fa-solid fa-plus"></i> إضافة</button>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="card">
+          <h4><i class="fa-solid fa-lightbulb" style="color:#f59e0b"></i> نصائح</h4>
+          <ul style="font-size:0.78rem;color:var(--text-muted);line-height:1.8;padding-right:16px;margin:8px 0 0">
+            <li>أضف 4-8 قطاعات للحصول على عجلة متوازنة وجذابة بصرياً</li>
+            <li>اجعل جائزة واحدة على الأقل "حظ سعيد" لزيادة التحدي</li>
+            <li>استخدم ألواناً متباينة لتظهر القطاعات بوضوح</li>
+            <li>تأكد من تفعيل العجلة حتى تظهر للزوار</li>
+            <li>يمكنك معاينة الصفحة المخصصة للعجلة من زر "معاينة الصفحة"</li>
+          </ul>
+        </div>
+
+        <!-- Quick Preview -->
+        <div class="card" style="display:flex;flex-direction:column;align-items:center">
+          <h4><i class="fa-solid fa-eye"></i> معاينة سريعة</h4>
+          <div style="position:relative;width:140px;height:140px;margin:12px auto 0" id="swPreviewContainer">
+            <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #f59e0b;z-index:2"></div>
+            <div id="swPreviewWheel" style="width:100%;height:100%;border-radius:50%;border:3px solid rgba(255,255,255,0.8);background:conic-gradient(#ccc 0deg 360deg);transition:none"></div>
+          </div>
+          <p style="font-size:0.7rem;color:var(--text-muted);margin-top:8px">تظهر الألوان بعد إضافة القطاعات</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTION -->
+    <div class="tab-content" id="tab-subscription">
+      <div class="section-header">
+        <h3>💎 الاشتراك والترقية (SaaS Billing)</h3>
+        <div style="margin-right:auto;display:flex;gap:8px;flex-wrap:wrap">
+          <a href="../../agency/index.html" target="_blank" style="font-size:.75rem;color:#3b82f6;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:8px"><i class="fa-solid fa-up-right-from-square"></i> منصة الشركة الرئيسيّة</a>
+        </div>
+      </div>
+      <div id="adminSubscriptionTabContent"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Order Edit Modal (kept for backward compat) -->
+<div id="orderEditModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);padding:20px;overflow-y:auto">
+  <div style="background:var(--card);border-radius:16px;max-width:600px;margin:20px auto;padding:24px;position:relative">
+    <button onclick="closeOrderEditModal()" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)"><i class="fa-solid fa-xmark"></i></button>
+    <h3 style="font-weight:800;margin-bottom:16px" id="orderEditTitle">تعديل الطلب</h3>
+    <div id="orderEditBody"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+      <button class="btn-primary" onclick="saveOrderEdit()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات</button>
+      <button class="btn-secondary" onclick="closeOrderEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Product Picker Modal -->
+<div id="productPickerModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);padding:20px;overflow-y:auto">
+  <div style="background:var(--card);border-radius:16px;max-width:550px;margin:20px auto;padding:20px;position:relative">
+    <button onclick="closeProductPicker()" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)"><i class="fa-solid fa-xmark"></i></button>
+    <h3 style="font-weight:800;margin-bottom:16px">اختر منتج للإضافة</h3>
+    <input type="text" id="pickerSearch" placeholder="بحث..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.85rem;margin-bottom:12px" oninput="renderPickerProducts()">
+    <div id="pickerProductsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:400px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/data.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
